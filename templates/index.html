@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaperLens - Agentic Paper Reading</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/website_logo.svg') }}">
+    <link rel="alternate icon" type="image/png" href="{{ url_for('static', filename='images/website_logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}?v=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-purple.css') }}?v=1.0">
+    <!-- PDF.js (CDN) for client-side PDF metadata parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Marked.js (CDN) for rendering Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/marked@15.0.12/marked.min.js';"></script>
+    <!-- Highlight.js (CDN) for code highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]],
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+            },
+            options: {
+                skipHtmlTags: ["script", "noscript", "style", "textarea", "pre"],
+                processHtmlClass: "markdown-viewer"
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js';"></script>
+</head>
+
+<body>
+    <script>
+        window.__SUPABASE_URL = {{ supabase_url | tojson }};
+        window.__SUPABASE_ANON_KEY = {{ supabase_anon_key | tojson }};
+        window.__LOCALE = {{ locale | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/i18n.js') }}?v=1.0"></script>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand" id="navbar-brand" style="cursor: pointer;" data-i18n-title="nav_back_home" title="Back to Home">
+                <img src="{{ url_for('static', filename='images/hompage_logo.svg') }}" alt="PaperLens" class="navbar-logo"
+                    id="navbar-logo"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                <span class="navbar-brand-text" id="navbar-brand-text" style="display:none;"><i class="fas fa-book"></i>
+                    PaperLens</span>
+            </div>
+            <div class="navbar-tabs" style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+                <button id="btn-show-reading-list" class="ti-item ti-reading" data-i18n-title="nav_view_reading_list" title="View reading list">
+                    <i class="fas fa-book-open"></i>
+                    <span class="ti-label" data-i18n="nav_reading_list">Reading List</span>
+                    <span class="ti-count" id="ti-reading-count">0</span>
+                </button>
+                <button class="nav-tab ti-item ti-daily-arxiv" data-tab="daily-arxiv" data-i18n-title="nav_daily_arxiv_title" title="Daily arXiv">
+                    <img src="{{ url_for('static', filename='images/arxiv-logo.svg') }}" alt="arXiv"
+                        class="arxiv-logo-icon">
+                    <span class="ti-label" data-i18n="nav_daily_arxiv">Daily arXiv</span>
+                </button>
+                <button class="nav-tab ti-item ti-paper active" data-tab="paper" data-i18n-title="nav_paper_title" title="Paper">
+                    <i class="fas fa-file-pdf"></i> <span class="ti-label" data-i18n="nav_paper">Paper</span>
+                </button>
+                <button id="logout-btn" class="ti-item" data-i18n-title="nav_logout" title="Log Out" style="display: none;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="ti-label" data-i18n="nav_logout">Log Out</span>
+                </button>
+                <button id="login-btn" class="ti-item" data-i18n-title="nav_login" title="Log In" style="display: none;">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span class="ti-label" data-i18n="nav_login">Log In</span>
+                </button>
+                <div class="nav-avatar" id="nav-avatar" data-tab="setting" data-i18n-title="nav_settings" title="Settings">
+                    <canvas id="nav-avatar-canvas" width="32" height="32"></canvas>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Paper View (hidden until bootstrap restores state to avoid flash of empty state) -->
+    <div class="container" id="paper-view" style="display: none;">
+        <!-- Left Sidebar: Categories -->
+        <div class="sidebar" style="display: none;">
+            <div class="sidebar-resizer" id="sidebar-resizer"></div>
+            <div class="sidebar-header">
+                <h3><i class="fas fa-folder-tree"></i> <span data-i18n="sidebar_my_library">My Library</span></h3>
+                <button id="add-root-category" class="btn-add"
+                    data-i18n-title="sidebar_add_category" title="Add category (add subcategory if one is selected, otherwise add root category)">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div class="category-tree" id="category-tree">
+                <!-- Category tree will be rendered here -->
+            </div>
+            <!-- Upload area removed -->
+            <input type="file" id="file-input" accept=".pdf" multiple style="display: none;">
+        </div>
+
+        <!-- Middle: PDF List -->
+        <div class="main-content">
+            <div class="content-header">
+                <h3 id="current-category" data-i18n="content_select_category">Select a category to view PDFs</h3>
+                <div class="content-actions">
+                    <div class="search-box">
+                        <input id="global-search" type="text" data-i18n-placeholder="search_placeholder" placeholder="Search Title / Authors / Abstract / Notes"
+                            autocomplete="off" />
+                        <div id="search-results" class="search-results" style="display:none;"></div>
+                    </div>
+                    <div class="sort-controls" id="sort-controls" style="display: none;">
+                        <label for="sort-by" data-i18n="sort_label">Sort:</label>
+                        <select id="sort-by">
+                            <option value="upload_date_desc" data-i18n="sort_upload_desc">Upload time ↓</option>
+                            <option value="upload_date_asc" data-i18n="sort_upload_asc">Upload time ↑</option>
+                            <option value="title_asc" data-i18n="sort_title_asc">Title A-Z</option>
+                            <option value="title_desc" data-i18n="sort_title_desc">Title Z-A</option>
+                            <option value="published_date_desc" data-i18n="sort_published_desc">Published date ↓</option>
+                            <option value="published_date_asc" data-i18n="sort_published_asc">Published date ↑</option>
+                            <option value="authors_asc" data-i18n="sort_authors_asc">Authors A-Z</option>
+                            <option value="authors_desc" data-i18n="sort_authors_desc">Authors Z-A</option>
+                        </select>
+                    </div>
+                    <button id="refresh-papers" class="btn-action" data-i18n-title="nav_refresh" title="Refresh">
+                        <i class="fas fa-refresh"></i>
+                    </button>
+                    <button id="toggle-multiselect" class="btn-action" data-i18n-title="nav_multi_select" title="Multi-select mode">
+                        <i class="fas fa-check-double"></i>
+                    </button>
+                    <button id="upload-btn" class="btn-action" data-i18n-title="nav_upload" title="Upload files">
+                        <i class="fas fa-upload"></i>
+                    </button>
+                    <button id="upload-arxiv-btn" class="btn-action" data-i18n-title="nav_import_arxiv" title="Import from arXiv">
+                        <i class="fas fa-link"></i>
+                    </button>
+                    <span id="reading-list-label" class="reading-list-label" style="display: none;" data-i18n="reading_list_label">Reading list</span>
+                </div>
+            </div>
+            <div class="batch-toolbar" id="batch-toolbar" style="display:none;">
+                <div class="batch-left">
+                    <span id="batch-count" data-i18n="batch_selected">Selected 0 items</span>
+                </div>
+                <div class="batch-actions">
+                    <button class="btn" id="batch-analyze" data-i18n-title="batch_analyze_title" title="AI Interpretation"><i class="fas fa-brain"></i>
+                        <span data-i18n="batch_analyze">Analyze</span></button>
+                    <button class="btn" id="batch-translate" data-i18n-title="batch_translate_title" title="AI Translation"><i class="fas fa-language"></i>
+                        <span data-i18n="batch_translate">Translate</span></button>
+                    <button class="btn btn-danger" id="batch-delete" data-i18n-title="batch_delete_title" title="Delete"><i class="fas fa-trash"></i>
+                        <span data-i18n="batch_delete">Delete</span></button>
+                    <button class="btn btn-secondary" id="batch-cancel" data-i18n-title="batch_cancel_title" title="Exit multi-select"><i
+                            class="fas fa-times"></i> <span data-i18n="batch_cancel">Cancel</span></button>
+                </div>
+            </div>
+
+            <!-- Sidebar Toggles -->
+            <div class="sidebar-toggle-bar">
+                <button id="toggle-left-sidebar" class="btn-toggle-sidebar" data-i18n-title="toggle_library" title="Toggle Library">
+                    <i class="fas fa-folder-tree"></i>
+                </button>
+                <button id="toggle-right-sidebar" class="btn-toggle-sidebar" data-i18n-title="toggle_paper_info" title="Toggle Paper Info">
+                    <i class="fas fa-file-alt"></i>
+                </button>
+            </div>
+
+            <div class="papers-list" id="papers-list">
+                <div class="empty-state" id="papers-list-empty-initial">
+                    <i class="fas fa-file-pdf"></i>
+                    <p data-i18n="select_category_left">Select a category on the left to view PDF files</p>
+                    <p class="empty-state-hint" data-i18n="empty_state_hint">Upload PDF or import from Daily arXiv to get started.</p>
+                    <div class="empty-state-actions">
+                        <button type="button" class="btn btn-primary btn-sm" id="empty-state-upload-btn" data-i18n-title="nav_upload" title="Upload PDF"><i class="fas fa-upload"></i> <span data-i18n="upload_pdf_btn">Upload PDF</span></button>
+                        <button type="button" class="btn btn-outline btn-sm" id="empty-state-daily-arxiv-btn" data-i18n-title="nav_daily_arxiv_title" title="Daily arXiv"><img src="{{ url_for('static', filename='images/arxiv-logo.svg') }}" alt="arXiv" class="arxiv-logo-icon" style="width:14px;height:14px;vertical-align:middle;"> <span data-i18n="daily_arxiv_btn">Daily arXiv</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Info Panel -->
+        <div class="info-panel" id="info-panel" style="display: none;">
+            <div class="info-panel-resizer" id="info-panel-resizer"></div>
+            <div class="info-header">
+                <h3><i class="fas fa-info-circle"></i> <span data-i18n="paper_info">Paper Info</span></h3>
+            </div>
+            <div class="paper-info" id="paper-info">
+                <div class="empty-state">
+                    <i class="fas fa-file-alt"></i>
+                    <p data-i18n="select_paper_to_view_details">Select a paper to view details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily arXiv View -->
+    <div class="daily-arxiv-view" id="daily-arxiv-view" style="display: none;">
+        <div class="daily-arxiv-header">
+            <div class="daily-arxiv-title">
+                <h2><img src="{{ url_for('static', filename='images/arxiv-logo.svg') }}" alt="arXiv"
+                        class="arxiv-logo-icon"> <span data-i18n="nav_daily_arxiv">Daily arXiv</span></h2>
+                <!-- Date selector -->
+                <div class="daily-arxiv-date-selector" id="daily-arxiv-date-selector">
+                    <button class="date-nav-btn" id="daily-arxiv-prev-date" data-i18n-title="previous_day" title="Previous day">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span class="daily-arxiv-current-date" id="daily-arxiv-current-date">
+                        <!-- Date will be displayed here -->
+                    </span>
+                    <button class="date-nav-btn" id="daily-arxiv-next-date" data-i18n-title="next_day" title="Next day">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="daily-arxiv-actions">
+                <div class="daily-arxiv-actions-top">
+                    <!-- Daily arXiv search: title / authors / institution / abstract -->
+                    <div class="daily-arxiv-search-box">
+                        <input id="daily-arxiv-search" type="text"
+                            data-i18n-placeholder="daily_arxiv_search_placeholder" placeholder="Search title / author / institution / abstract..." />
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <button class="btn btn-outline" id="daily-arxiv-filter" data-i18n-title="daily_arxiv_filter_title" title="Filter current papers">
+                        <i class="fas fa-filter"></i> <span data-i18n="daily_arxiv_filter_btn">Filter</span>
+                    </button>
+                    <button class="btn btn-secondary" id="daily-arxiv-settings" data-i18n-title="daily_settings_btn" title="Configure arXiv categories">
+                        <i class="fas fa-cog"></i> <span data-i18n="daily_settings_btn">Settings</span>
+                    </button>
+                </div>
+                <div class="daily-arxiv-categories" id="daily-arxiv-categories">
+                    <!-- Category tags will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="daily-arxiv-progress" id="daily-arxiv-progress" style="display: none;">
+            <div class="progress-header">
+                <span class="progress-title" id="daily-arxiv-progress-title" data-i18n="daily_arxiv_fetching_papers">Fetching papers...</span>
+                <span class="progress-count" id="daily-arxiv-progress-count">0/0</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="daily-arxiv-progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="progress-current" id="daily-arxiv-progress-current"></div>
+        </div>
+
+        <!-- Loading state -->
+        <div class="daily-arxiv-loading" id="daily-arxiv-loading" style="display: none;">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <p data-i18n="daily_fetching">Fetching latest papers...</p>
+        </div>
+
+        <!-- Empty state: no categories configured -->
+        <div class="daily-arxiv-empty" id="daily-arxiv-empty" style="display: none;">
+            <i class="fas fa-cog fa-3x"></i>
+            <h3 data-i18n="daily_configure_first">Please configure arXiv categories first</h3>
+            <p data-i18n="daily_configure_hint">Click the "Settings" button in the top right to add arXiv categories you care about, e.g., cs.CV, cs.AI
+            </p>
+            <button class="btn btn-primary" onclick="showDailyArxivSettingsModal()">
+                <i class="fas fa-plus"></i> <span data-i18n="daily_add_category">Add category</span>
+            </button>
+        </div>
+
+        <!-- Filters + paper grid -->
+        <div class="daily-arxiv-main">
+            <!-- Filter panel -->
+            <div class="daily-arxiv-filter-panel" id="daily-arxiv-filter-panel" style="display: none;">
+                <div class="daily-arxiv-filter-resizer" id="daily-arxiv-filter-resizer"></div>
+                <div class="filter-panel-header">
+                    <h3 data-i18n="daily_filters">Filters</h3>
+                    <button class="filter-clear-btn" id="daily-arxiv-filter-clear" type="button"
+                        data-i18n-title="daily_clear_filters" title="Clear all filters">
+                        <i class="fas fa-times"></i>
+                        <span data-i18n="daily_clear_filters">Clear filters</span>
+                    </button>
+                </div>
+                <div class="filter-section-box">
+                    <div class="filter-section-header" onclick="toggleFilterSection(this)">
+                        <div class="filter-section-title">
+                            <i class="fas fa-chevron-down filter-toggle-icon"></i>
+                            <i class="fas fa-building"></i>
+                            <span data-i18n="daily_affiliation_filter">Affiliation filter</span>
+                        </div>
+                    </div>
+                    <div class="filter-section-body" id="daily-arxiv-filter-affiliations">
+                        <!-- Affiliation tags will be rendered here -->
+                    </div>
+                </div>
+                <div class="filter-section-box">
+                    <div class="filter-section-header" onclick="toggleFilterSection(this)">
+                        <div class="filter-section-title">
+                            <i class="fas fa-chevron-down filter-toggle-icon"></i>
+                            <i class="fas fa-globe"></i>
+                            <span data-i18n="daily_country_filter">Country filter</span>
+                        </div>
+                    </div>
+                    <div class="filter-section-body" id="daily-arxiv-filter-countries">
+                        <!-- Country tags will be rendered here -->
+                    </div>
+                </div>
+                <div class="filter-section-box">
+                    <div class="filter-section-header" onclick="toggleFilterSection(this)">
+                        <div class="filter-section-title">
+                            <i class="fas fa-chevron-down filter-toggle-icon"></i>
+                            <i class="fas fa-key"></i>
+                            <span data-i18n="daily_keyword_filter">Keyword filter</span>
+                        </div>
+                    </div>
+                    <div class="filter-section-body" id="daily-arxiv-filter-keywords">
+                        <!-- Keyword tags will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paper grid -->
+            <div class="daily-arxiv-grid" id="daily-arxiv-grid">
+                <!-- Thesis cards will be dynamically generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings View -->
+    <div class="setting-view" id="setting-view" style="display: none;">
+        <!-- Left sidebar -->
+        <div class="setting-sidebar">
+            <div class="setting-sidebar-header">
+                <div class="setting-user-avatar" id="setting-user-avatar" data-i18n-title="setting_click_avatar" title="Click to upload avatar">
+                    <canvas id="setting-avatar-canvas" width="56" height="56"></canvas>
+                    <div class="avatar-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                <div class="setting-user-info">
+                    <span class="setting-user-name" id="setting-user-name" data-i18n-title="setting_edit_name" title="Double-click to edit name">Paper
+                        Reader</span>
+                    <span class="setting-user-stats" id="setting-total-stats" data-i18n="setting_papers_reading">0 papers · 0h reading</span>
+                </div>
+            </div>
+            <nav class="setting-sidebar-nav">
+                <button class="setting-nav-item active" data-setting="general">
+                    <i class="fas fa-cog"></i>
+                    <span data-i18n="setting_general">Settings</span>
+                </button>
+                <button class="setting-nav-item" data-setting="overview">
+                    <i class="fas fa-chart-line"></i>
+                    <span data-i18n="setting_overview">Overview</span>
+                </button>
+                <button class="setting-nav-item" data-setting="agentic">
+                    <i class="fas fa-robot"></i>
+                    <span data-i18n="setting_agentic">Agentic</span>
+                </button>
+                <button class="setting-nav-item" data-setting="daily-arxiv">
+                    <img src="{{ url_for('static', filename='images/arxiv-logo.svg') }}" alt="arXiv"
+                        class="setting-nav-arxiv-icon">
+                    <span data-i18n="setting_daily_arxiv">Daily arXiv</span>
+                </button>
+                <button class="setting-nav-item" data-setting="import">
+                    <i class="fas fa-file-import"></i>
+                    <span data-i18n="setting_import">Import</span>
+                </button>
+                <button class="setting-nav-item" data-setting="export">
+                    <i class="fas fa-file-export"></i>
+                    <span data-i18n="setting_export">Export</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Main content -->
+        <div class="setting-main">
+            <!-- General Settings Panel (language and future app-wide settings) -->
+            <div class="setting-panel" id="setting-panel-general" style="display:block;">
+                <div class="panel-header">
+                    <h2><i class="fas fa-cog"></i> <span data-i18n="setting_general">Settings</span></h2>
+                    <p data-i18n="settings_subtitle">Manage interface language and other app preferences.</p>
+                </div>
+                <div class="setting-card" style="margin-bottom: 24px;">
+                    <div class="setting-card-header">
+                        <i class="fas fa-language"></i>
+                        <span data-i18n="settings_interface_language">Interface Language</span>
+                    </div>
+                    <div class="setting-card-body">
+                        <p style="color: #666; margin-bottom: 12px; font-size: 14px;">
+                            <i class="fas fa-info-circle"></i>
+                            <span data-i18n="settings_interface_language_hint">Choose the language for the entire UI.</span>
+                        </p>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="setting-locale" data-i18n="settings_language_label">Language</label>
+                            </div>
+                            <select id="setting-locale" class="setting-input" style="width: 200px;">
+                                <option value="en" data-i18n="settings_lang_english">English</option>
+                                <option value="zh_CN" data-i18n="settings_lang_simplified_chinese">简体中文</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!-- More setting cards can be added here later -->
+            </div>
+
+            <!-- Overview Panel -->
+            <div class="setting-panel" id="setting-panel-overview" style="display:none;">
+                <div class="overview-header">
+                    <h2 data-i18n="overview_reading_activity">Reading Activity</h2>
+                </div>
+
+                <!-- Stats cards -->
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-icon papers"><i class="fas fa-file-pdf"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="stat-total-papers">0</span>
+                            <span class="stat-label" data-i18n="overview_total_papers">Total papers</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon time"><i class="fas fa-clock"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="stat-total-time">0h</span>
+                            <span class="stat-label" data-i18n="overview_total_reading_time">Total reading time</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon papers"><i class="fas fa-file-pdf"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="stat-week-papers">0</span>
+                            <span class="stat-label" data-i18n="overview_papers_this_week">Papers read this week</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon time"><i class="fas fa-clock"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="stat-week-time">0h</span>
+                            <span class="stat-label" data-i18n="overview_reading_time_this_week">Reading time this week</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Heatmap -->
+                <div class="heatmap-container">
+                    <div class="heatmap-header">
+                        <span class="heatmap-contributions" id="heatmap-total">0 days with reading activity</span>
+                        <div class="heatmap-year-selector">
+                            <button class="year-btn" id="year-prev"><i class="fas fa-chevron-left"></i></button>
+                            <span class="year-display" id="heatmap-year">2025</span>
+                            <button class="year-btn" id="year-next"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="heatmap-wrapper">
+                        <div class="heatmap-months" id="heatmap-months"></div>
+                        <div class="heatmap-body">
+                            <div class="heatmap-days">
+                                <span>Mon</span>
+                                <span>Wed</span>
+                                <span>Fri</span>
+                            </div>
+                            <div class="heatmap-grid" id="heatmap-grid"></div>
+                        </div>
+                    </div>
+                    <div class="heatmap-footer">
+                        <span class="heatmap-legend-label" data-i18n="overview_heatmap_less">Less</span>
+                        <div class="heatmap-legend" id="heatmap-legend" title="Click to choose a color scheme">
+                            <span class="heatmap-level" data-level="0"></span>
+                            <span class="heatmap-level" data-level="1"></span>
+                            <span class="heatmap-level" data-level="2"></span>
+                            <span class="heatmap-level" data-level="3"></span>
+                            <span class="heatmap-level" data-level="4"></span>
+                        </div>
+                        <span class="heatmap-legend-label" data-i18n="overview_heatmap_more">More</span>
+                        <!-- Color scheme dropdown -->
+                        <div class="color-scheme-dropdown" id="color-scheme-dropdown">
+                            <div class="color-scheme-option" data-scheme="green">
+                                <span class="scheme-preview green"></span>
+                                <span data-i18n="overview_heatmap_github_green">GitHub Green</span>
+                            </div>
+                            <div class="color-scheme-option" data-scheme="blue">
+                                <span class="scheme-preview blue"></span>
+                                <span data-i18n="overview_heatmap_ocean_blue">Ocean Blue</span>
+                            </div>
+                            <div class="color-scheme-option" data-scheme="purple">
+                                <span class="scheme-preview purple"></span>
+                                <span data-i18n="overview_heatmap_violet_purple">Violet Purple</span>
+                            </div>
+                            <div class="color-scheme-option" data-scheme="orange">
+                                <span class="scheme-preview orange"></span>
+                                <span data-i18n="overview_heatmap_sunset_orange">Sunset Orange</span>
+                            </div>
+                            <div class="color-scheme-option" data-scheme="pink">
+                                <span class="scheme-preview pink"></span>
+                                <span data-i18n="overview_heatmap_rose_pink">Rose Pink</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent reading -->
+                <div class="recent-activity">
+                    <h3><i class="fas fa-history"></i> <span data-i18n="overview_recent_reading">Recent Reading</span></h3>
+                    <div class="recent-list" id="recent-activity-list">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agentic Panel -->
+            <div class="setting-panel" id="setting-panel-agentic" style="display:none;">
+                <div class="panel-header">
+                    <h2><i class="fas fa-robot"></i> <span data-i18n="agentic_title">Agentic Settings</span></h2>
+                    <p data-i18n="agentic_subtitle">AI feature configuration (translation, interpretation, daily arXiv, etc.)</p>
+                </div>
+
+                <!-- LLM API configuration -->
+                <div class="setting-card">
+                    <div class="setting-card-header">
+                        <i class="fas fa-brain"></i>
+                        <span data-i18n="agentic_llm_config">LLM API Configuration</span>
+                    </div>
+                    <div class="setting-card-body">
+                        <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
+                            <i class="fas fa-info-circle"></i>
+                            <span data-i18n="agentic_llm_hint">Configure different OpenAI-compatible inference services for different AI feature scenarios.</span>
+                        </p>
+
+                        <div style="margin-top: 8px;">
+                            <h4 style="margin: 0 0 10px; font-size: 15px;" data-i18n="agentic_translate">AI Translate</h4>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <label for="llm-translate-model" data-i18n="agentic_model_name">Model Name</label>
+                                    <small data-i18n="agentic_translate_model_hint">LLM model name for paper translation</small>
+                                </div>
+                                <input type="text" id="llm-translate-model" data-i18n-placeholder="agentic_model_placeholder" placeholder="e.g. Qwen3-4B-Instruct-2507"
+                                    class="setting-input" />
+                            </div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <label for="llm-translate-base-url" data-i18n="agentic_base_url">Base URL</label>
+                                    <small data-i18n="agentic_base_url_hint">OpenAI-compatible API base URL</small>
+                                </div>
+                                <input type="text" id="llm-translate-base-url" placeholder="http://0.0.0.0:6002/v1"
+                                    class="setting-input" />
+                            </div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <label for="llm-translate-api-key" data-i18n="agentic_api_key">API Key</label>
+                                    <small data-i18n="agentic_api_key_hint">API access key</small>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="password" id="llm-translate-api-key" placeholder="token-abc123" class="setting-input"
+                                        style="width: 300px; max-width: 300px;" />
+                                    <button id="test-llm-api-translate" class="btn btn-secondary" style="white-space: nowrap;"
+                                        data-i18n-title="test_llm_translate_title" title="Test LLM API connection (AI Translate)">
+                                        <i class="fas fa-vial"></i> <span data-i18n="agentic_test">Test</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="llm-test-result-translate" style="margin-top: 8px; display: none;"></div>
+                        </div>
+
+                        <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid #eee;">
+                            <h4 style="margin: 0 0 10px; font-size: 15px;" data-i18n="agentic_interpret">AI Interpret</h4>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <label for="llm-interpret-model" data-i18n="agentic_model_name">Model Name</label>
+                                    <small data-i18n="agentic_interpret_model_hint">LLM model name for paper summary & chat</small>
+                                </div>
+                                <input type="text" id="llm-interpret-model" data-i18n-placeholder="agentic_model_placeholder" placeholder="e.g. Qwen3-4B-Instruct-2507"
+                                    class="setting-input" />
+                            </div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <label for="llm-interpret-base-url" data-i18n="agentic_base_url">Base URL</label>
+                                    <small data-i18n="agentic_base_url_hint">OpenAI-compatible API base URL</small>
+                                </div>
+                                <input type="text" id="llm-interpret-base-url" placeholder="http://0.0.0.0:6002/v1"
+                                    class="setting-input" />
+                            </div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <label for="llm-interpret-api-key" data-i18n="agentic_api_key">API Key</label>
+                                    <small data-i18n="agentic_api_key_hint">API access key</small>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="password" id="llm-interpret-api-key" placeholder="token-abc123" class="setting-input"
+                                        style="width: 300px; max-width: 300px;" />
+                                    <button id="test-llm-api-interpret" class="btn btn-secondary" style="white-space: nowrap;"
+                                        data-i18n-title="test_llm_interpret_title" title="Test LLM API connection (AI Interpret)">
+                                        <i class="fas fa-vial"></i> <span data-i18n="agentic_test">Test</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="llm-test-result-interpret" style="margin-top: 8px; display: none;"></div>
+                        </div>
+
+                        <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid #eee;">
+                            <h4 style="margin: 0 0 10px; font-size: 15px;" data-i18n="agentic_daily_arxiv">Daily arXiv</h4>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <label for="llm-dailyArxiv-model" data-i18n="agentic_model_name">Model Name</label>
+                                    <small data-i18n="agentic_daily_arxiv_model_hint">LLM model name for Daily arXiv abstract summary</small>
+                                </div>
+                                <input type="text" id="llm-dailyArxiv-model" data-i18n-placeholder="agentic_model_placeholder" placeholder="e.g. Qwen3-4B-Instruct-2507"
+                                    class="setting-input" />
+                            </div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <label for="llm-dailyArxiv-base-url" data-i18n="agentic_base_url">Base URL</label>
+                                    <small data-i18n="agentic_base_url_hint">OpenAI-compatible API base URL</small>
+                                </div>
+                                <input type="text" id="llm-dailyArxiv-base-url" placeholder="http://0.0.0.0:6002/v1"
+                                    class="setting-input" />
+                            </div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <label for="llm-dailyArxiv-api-key" data-i18n="agentic_api_key">API Key</label>
+                                    <small data-i18n="agentic_api_key_hint">API access key</small>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="password" id="llm-dailyArxiv-api-key" placeholder="token-abc123" class="setting-input"
+                                        style="width: 300px; max-width: 300px;" />
+                                    <button id="test-llm-api-dailyArxiv" class="btn btn-secondary" style="white-space: nowrap;"
+                                        data-i18n-title="test_llm_daily_title" title="Test LLM API connection (Daily arXiv)">
+                                        <i class="fas fa-vial"></i> <span data-i18n="agentic_test">Test</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="llm-test-result-dailyArxiv" style="margin-top: 8px; display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Output Language Configuration -->
+                <div class="setting-card">
+                    <div class="setting-card-header">
+                        <i class="fas fa-language"></i>
+                        <span data-i18n="agentic_output_language">AI Output Language</span>
+                    </div>
+                    <div class="setting-card-body">
+                        <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
+                            <i class="fas fa-info-circle"></i>
+                            <span data-i18n="agentic_output_language_hint">Select the output language for AI features. This setting applies to AI translation, AI interpretation, and Daily arXiv summary.</span>
+                        </p>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="ai-language" data-i18n="agentic_output_language_label">Output Language</label>
+                                <small data-i18n="agentic_output_language_small">Language for AI-generated content</small>
+                            </div>
+                            <select id="ai-language" class="setting-input" style="width: 200px;">
+                                <option value="zh" data-i18n="agentic_lang_chinese">Chinese</option>
+                                <option value="en" data-i18n="agentic_lang_english">English</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PDF parsing service configuration -->
+                <div class="setting-card">
+                    <div class="setting-card-header">
+                        <i class="fas fa-file-pdf"></i>
+                        <span data-i18n="pdf_parsing_service">PDF Parsing Service</span>
+                    </div>
+                    <div class="setting-card-body">
+                        <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
+                            <i class="fas fa-info-circle"></i>
+                            <span data-i18n="pdf_parsing_hint">Used by AI analysis to convert PDF to Markdown format.</span>
+                        </p>
+
+                        <!-- MinerU Mode Selection -->
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label data-i18n="mineru_mode">MinerU Mode</label>
+                                <small data-i18n="mineru_mode_hint">Choose between local deployment or cloud API</small>
+                            </div>
+                            <div style="display: flex; gap: 20px; align-items: center;">
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                    <input type="radio" name="mineru-mode" value="local" checked>
+                                    <span data-i18n="local_deployment">Local Deployment</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                    <input type="radio" name="mineru-mode" value="api">
+                                    <span data-i18n="cloud_api">Cloud API</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Local Mode Configuration -->
+                        <div id="mineru-local-config">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <label for="mineru-server-url" data-i18n="mineru_server_url">MinerU Server URL</label>
+                                    <small data-i18n="mineru_server_url_hint">Local PDF parsing service URL</small>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="text" id="mineru-server-url" placeholder="http://0.0.0.0:6002"
+                                        class="setting-input" style="width: 300px; max-width: 300px;" />
+                                    <button id="test-mineru-btn" class="btn btn-secondary" style="white-space: nowrap;"
+                                        data-i18n-title="test_mineru_title" title="Test MinerU connection">
+                                        <i class="fas fa-vial"></i> <span data-i18n="agentic_test">Test</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- API Mode Configuration -->
+                        <div id="mineru-api-config" style="display: none;">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <label for="mineru-api-token" data-i18n="mineru_api_token">MinerU API Token</label>
+                                    <small><span data-i18n="mineru_get_token_hint">Get your token at </span><a href="https://mineru.net/" target="_blank"
+                                            style="color: #2196F3;">https://mineru.net/</a></small>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="password" id="mineru-api-token" data-i18n-placeholder="mineru_api_token_placeholder" placeholder="Enter your API token"
+                                        class="setting-input" style="width: 400px; max-width: 400px;" />
+                                    <button id="test-mineru-btn" class="btn btn-secondary" style="white-space: nowrap;"
+                                        data-i18n-title="test_mineru_api_title" title="Test MinerU API token">
+                                        <i class="fas fa-vial"></i> <span data-i18n="agentic_test">Test</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="mineru-test-result" style="margin-top: 8px; display: none;"></div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- Daily arXiv Panel -->
+            <div class="setting-panel" id="setting-panel-daily-arxiv" style="display:none;">
+                <div class="panel-header">
+                    <h2><img src="{{ url_for('static', filename='images/arxiv-logo.svg') }}" alt="arXiv"
+                            class="panel-header-arxiv-icon"> <span data-i18n="daily_settings_title">Daily arXiv Settings</span></h2>
+                    <p data-i18n="daily_settings_subtitle">Configure daily arXiv paper fetching</p>
+                </div>
+                <div class="setting-card">
+                    <div class="setting-card-header">
+                        <i class="fas fa-power-off"></i>
+                        <span data-i18n="daily_feature_switch">Feature Switch</span>
+                    </div>
+                    <div class="setting-card-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="daily-arxiv-enabled" data-i18n="daily_enable">Enable Daily arXiv</label>
+                                <small data-i18n="daily_enable_hint">Turn on/off the automatic daily paper fetching</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="daily-arxiv-enabled">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting-card">
+                    <div class="setting-card-header">
+                        <i class="fas fa-tags"></i>
+                        <span data-i18n="daily_categories">arXiv Categories</span>
+                    </div>
+                    <div class="setting-card-body">
+                        <div class="setting-row full-width">
+                            <div class="setting-info">
+                                <label data-i18n="daily_configured_categories">Configured categories</label>
+                                <small data-i18n="daily_categories_hint">Add arXiv categories you care about, e.g., cs.CV, cs.AI, cs.LG, etc.</small>
+                            </div>
+                            <div class="daily-arxiv-category-list" id="daily-arxiv-category-list">
+                                <!-- Category tags will be rendered here -->
+                            </div>
+                            <div class="daily-arxiv-add-category">
+                                <input type="text" id="daily-arxiv-new-category"
+                                    data-i18n-placeholder="daily_placeholder_category" placeholder="Enter category name, e.g., cs.CV" class="setting-input" />
+                                <button class="btn btn-secondary" onclick="addDailyArxivCategory()">
+                                    <i class="fas fa-plus"></i> <span data-i18n="daily_add_btn">Add</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="arxiv-category-suggestions">
+                            <span class="suggestion-label" data-i18n="daily_common_categories">Common categories:</span>
+                            <button class="suggestion-tag" onclick="addDailyArxivCategoryQuick('cs.CV')">cs.CV</button>
+                            <button class="suggestion-tag" onclick="addDailyArxivCategoryQuick('cs.AI')">cs.AI</button>
+                            <button class="suggestion-tag" onclick="addDailyArxivCategoryQuick('cs.LG')">cs.LG</button>
+                            <button class="suggestion-tag" onclick="addDailyArxivCategoryQuick('cs.CL')">cs.CL</button>
+                            <button class="suggestion-tag" onclick="addDailyArxivCategoryQuick('cs.RO')">cs.RO</button>
+                            <button class="suggestion-tag"
+                                onclick="addDailyArxivCategoryQuick('stat.ML')">stat.ML</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting-card">
+                    <div class="setting-card-header">
+                        <i class="fas fa-sliders-h"></i>
+                        <span data-i18n="daily_fetch_settings">Fetch settings</span>
+                    </div>
+                    <div class="setting-card-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="daily-arxiv-retention-days" data-i18n="daily_retention_days">Retention days</label>
+                                <small data-i18n="daily_retention_hint">Papers older than this days will be automatically cleaned up</small>
+                            </div>
+                            <input type="number" id="daily-arxiv-retention-days" min="1" max="30" value="7"
+                                class="setting-input" />
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="daily-arxiv-check-interval" data-i18n="daily_check_interval">Check interval (minutes)</label>
+                                <small data-i18n="daily_check_interval_hint">Interval for automatically checking new papers</small>
+                            </div>
+                            <input type="number" id="daily-arxiv-check-interval" min="5" max="60" value="10"
+                                class="setting-input" />
+                        </div>
+                    </div>
+                </div>
+                <div class="setting-card">
+                    <div class="setting-card-header">
+                        <i class="fas fa-key"></i>
+                        <span data-i18n="daily_keyword_list">Keyword list</span>
+                    </div>
+                    <div class="setting-card-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <label for="daily-arxiv-max-keywords" data-i18n="daily_max_keywords">Max keywords</label>
+                                <small data-i18n="daily_max_keywords_hint">Maximum number of keywords extracted by AI (1-3)</small>
+                            </div>
+                            <input type="number" id="daily-arxiv-max-keywords" min="1" max="3" value="1"
+                                class="setting-input" />
+                        </div>
+                        <div class="setting-row full-width">
+                            <div class="setting-info">
+                                <label data-i18n="daily_keyword_list">Keyword list</label>
+                                <small data-i18n="daily_keyword_list_hint">Candidate list used when AI extracts keywords for papers</small>
+                            </div>
+                            <div class="daily-arxiv-keyword-list" id="daily-arxiv-keyword-list">
+                                <!-- Keyword tags will be rendered here -->
+                            </div>
+                            <div class="daily-arxiv-add-keyword">
+                                <input type="text" id="daily-arxiv-new-keyword"
+                                    data-i18n-placeholder="daily_placeholder_keyword" placeholder="Enter keyword, press Enter to add" class="setting-input" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting-card">
+                    <div class="setting-card-header">
+                        <i class="fas fa-university"></i>
+                        <span data-i18n="daily_institution_config">Additional institution configuration</span>
+                    </div>
+                    <div class="setting-card-body">
+                        <div class="setting-row full-width">
+                            <div class="setting-info">
+                                <label data-i18n="daily_configured_institutions">Configured institutions</label>
+                                <small data-i18n="daily_institution_hint">Double-click an institution tag to edit abbreviation and full-name
+                                    variants</small>
+                            </div>
+                            <div class="custom-institution-list" id="custom-institution-list">
+                                <!-- Custom institution tags will be rendered here -->
+                            </div>
+                            <button class="btn btn-secondary" onclick="showAddInstitutionModal()"
+                                style="margin-top: 12px;">
+                                <i class="fas fa-plus"></i> <span data-i18n="daily_add_institution">Add institution</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Import Panel -->
+            <div class="setting-panel" id="setting-panel-import" style="display:none;">
+                <div class="panel-header">
+                    <h2><i class="fas fa-file-import"></i> <span data-i18n="import_title">Import Data</span></h2>
+                    <p data-i18n="import_subtitle">Import your paper library from Zotero or other sources</p>
+                </div>
+
+                <!-- Import type tabs -->
+                <div class="import-type-tabs">
+                    <button class="import-type-tab active" data-import-type="zotero">
+                        <i class="fas fa-book"></i>
+                        <span data-i18n="import_zotero">Import from Zotero</span>
+                    </button>
+                    <button class="import-type-tab" data-import-type="export">
+                        <i class="fas fa-file-archive"></i>
+                        <span data-i18n="import_export_file">Import from export file</span>
+                    </button>
+                </div>
+
+                <!-- Zotero import -->
+                <div id="import-zotero-panel" class="import-content-panel">
+                    <div class="setting-card">
+                        <div class="setting-card-header">
+                            <i class="fas fa-upload"></i>
+                            <span data-i18n="import_upload_rdf">Upload RDF file</span>
+                        </div>
+                        <div class="setting-card-body">
+                            <div class="import-options">
+                                <div class="import-target-category">
+                                    <label><i class="fas fa-folder"></i> <span data-i18n="import_into_folder">Import into folder:</span></label>
+                                    <select id="import-target-category">
+                                        <option value="" data-i18n="import_root_default">Root (default)</option>
+                                        <!-- Category list will be filled by JS -->
+                                    </select>
+                                    <small data-i18n="import_zotero_folder_hint">Zotero collections will be created under the selected folder</small>
+                                </div>
+                            </div>
+
+                            <div class="import-drop-zone" id="import-drop-zone">
+                                <div class="drop-zone-content" id="drop-zone-content">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p data-i18n="import_drag_rdf">Drag Zotero RDF file here</p>
+                                    <span><span data-i18n="import_or">or</span> <a href="#"
+                                            onclick="document.getElementById('rdf-file-input').click(); return false;" data-i18n="import_click_choose">click
+                                            to choose a file</a></span>
+                                    <small data-i18n="import_zotero_export_hint">Export from Zotero: File → Export Library → choose RDF format</small>
+                                </div>
+                                <input type="file" id="rdf-file-input" accept=".rdf" style="display: none;">
+                            </div>
+
+                            <!-- Parsing progress -->
+                            <div class="import-progress-container" id="import-progress-container"
+                                style="display: none;">
+                                <div class="import-status">
+                                    <i class="fas fa-spinner fa-spin" id="import-status-icon"></i>
+                                    <span id="import-status-text" data-i18n="import_status_parsing">Parsing RDF file...</span>
+                                    <!-- Cancel import button is hidden -->
+                                    <!-- <button class="btn btn-danger btn-sm" id="cancel-import-btn" onclick="cancelImport()" style="margin-left: 10px; display: none;">
+                                    <i class="fas fa-times"></i> Cancel import
+                                </button> -->
+                                </div>
+                                <div class="import-progress-bar">
+                                    <div class="import-progress-fill" id="import-progress-fill" style="width: 0%"></div>
+                                </div>
+                                <div class="import-progress-detail" id="import-progress-detail" data-i18n="import_progress_preparing">
+                                    Preparing...
+                                </div>
+                            </div>
+
+                            <!-- Import result -->
+                            <div class="import-result" id="import-result" style="display: none;">
+                                <div class="import-result-summary">
+                                    <div class="result-stat success">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span id="import-success-count">0</span>
+                                        <label data-i18n="import_label_imported">Imported</label>
+                                    </div>
+                                    <div class="result-stat failed">
+                                        <i class="fas fa-times-circle"></i>
+                                        <span id="import-failed-count">0</span>
+                                        <label data-i18n="import_label_failed">Failed</label>
+                                    </div>
+                                    <div class="result-stat skipped">
+                                        <i class="fas fa-forward"></i>
+                                        <span id="import-skipped-count">0</span>
+                                        <label data-i18n="import_label_skipped">Skipped</label>
+                                    </div>
+                                    <div class="result-stat duplicate">
+                                        <i class="fas fa-clone"></i>
+                                        <span id="import-duplicate-count">0</span>
+                                        <label data-i18n="import_label_duplicates">Duplicates</label>
+                                    </div>
+                                </div>
+                                <div class="import-result-detail" id="import-result-detail" style="display: none;">
+                                    <p><i class="fas fa-folder" style="color: #8b949e;"></i> <strong
+                                            id="import-others-count">0</strong> <span data-i18n="import_others_msg">papers without categories were placed
+                                        into the "Others" folder.</span></p>
+                                </div>
+                                <div class="import-result-actions">
+                                    <button class="btn btn-primary" onclick="resetImport()">
+                                        <i class="fas fa-redo"></i> <span data-i18n="import_again">Import again</span>
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="switchToOverview()">
+                                        <i class="fas fa-arrow-left"></i> <span data-i18n="back_to_overview">Back to Overview</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Import instructions -->
+                    <div class="setting-card">
+                        <div class="setting-card-header">
+                            <i class="fas fa-info-circle"></i>
+                            <span data-i18n="import_howto">How to import</span>
+                        </div>
+                        <div class="setting-card-body">
+                            <div class="import-instructions">
+                                <div class="instruction-step">
+                                    <span class="step-number">1</span>
+                                    <div class="step-content">
+                                        <strong data-i18n="import_step1_title">Export Zotero library</strong>
+                                        <p data-i18n="import_step1_desc">In Zotero, select "My Library", right-click and choose "Export Library",
+                                            select Zotero RDF to get an .rdf file.</p>
+                                    </div>
+                                </div>
+                                <div class="instruction-step">
+                                    <span class="step-number">2</span>
+                                    <div class="step-content">
+                                        <strong data-i18n="import_step2_title">Upload RDF file</strong>
+                                        <p data-i18n="import_step2_desc">Drag the exported .rdf file into the area above, the system will parse it
+                                            automatically.</p>
+                                    </div>
+                                </div>
+                                <div class="instruction-step">
+                                    <span class="step-number">3</span>
+                                    <div class="step-content">
+                                        <strong data-i18n="import_step3_title">Auto-download PDFs</strong>
+                                        <p data-i18n="import_step3_desc">The system will automatically download PDFs from arXiv based on paper
+                                            information.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Import from export file -->
+                <div id="import-export-panel" class="import-content-panel" style="display:none;">
+                    <div class="setting-card">
+                        <div class="setting-card-header">
+                            <i class="fas fa-file-archive"></i>
+                            <span data-i18n="import_upload_export_file">Upload export file</span>
+                        </div>
+                        <div class="setting-card-body">
+                            <div class="export-info-box" style="margin-bottom: 20px;">
+                                <i class="fas fa-info-circle"></i>
+                                <div class="export-info-text">
+                                    <p><strong data-i18n="import_export_about">About importing from export files:</strong></p>
+                                    <ul>
+                                        <li data-i18n="import_export_supports">Supports importing ZIP files generated by the Export feature.</li>
+                                        <li data-i18n="import_export_restore">Will automatically restore pdfs, folder structure.</li>
+                                        <li data-i18n="import_export_merge">If a category already exists, it will be merged automatically.</li>
+                                        <li data-i18n="import_export_dup_skip">Duplicate papers will be skipped.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="import-drop-zone" id="export-import-drop-zone">
+                                <div class="drop-zone-content" id="export-drop-zone-content">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p data-i18n="import_drag_zip">Drag exported ZIP file here</p>
+                                    <span><span data-i18n="import_or">or</span> <a href="#"
+                                            onclick="document.getElementById('export-file-input').click(); return false;" data-i18n="import_click_choose">click
+                                            to choose a file</a></span>
+                                    <small data-i18n="import_export_zip_hint">ZIP file generated by the Export feature</small>
+                                </div>
+                                <input type="file" id="export-file-input" accept=".zip" style="display: none;">
+                            </div>
+
+                            <!-- Import progress -->
+                            <div id="export-import-progress-container" style="display:none; margin-top: 20px;">
+                                <div class="import-progress-header">
+                                    <span id="export-import-status-text" data-i18n="import_export_status">Importing...</span>
+                                    <span id="export-import-progress-percent">0%</span>
+                                </div>
+                                <div class="import-progress-bar">
+                                    <div id="export-import-progress-fill" class="import-progress-fill"
+                                        style="width: 0%;"></div>
+                                </div>
+                                <div id="export-import-current-item" class="import-current-item"></div>
+                                <div class="import-details" id="export-import-details">
+                                    <span><span data-i18n="export_label_success">Success:</span> <strong id="export-import-success-count">0</strong></span>
+                                    <span><span data-i18n="export_label_failed">Failed:</span> <strong id="export-import-failed-count">0</strong></span>
+                                    <span><span data-i18n="export_label_skipped">Skipped:</span> <strong id="export-import-skipped-count">0</strong></span>
+                                    <span><span data-i18n="export_label_duplicates">Duplicates:</span> <strong id="export-import-duplicate-count">0</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Usage instructions -->
+                    <div class="setting-card">
+                        <div class="setting-card-header">
+                            <i class="fas fa-info-circle"></i>
+                            <span data-i18n="settings_usage">Usage</span>
+                        </div>
+                        <div class="setting-card-body">
+                            <div class="import-instructions">
+                                <div class="instruction-step">
+                                    <span class="step-number">1</span>
+                                    <div class="step-content">
+                                        <strong data-i18n="import_export_prepare_title">Prepare export file</strong>
+                                        <p data-i18n="import_export_prepare_desc">Make sure you have a ZIP file generated by the Export feature. This file
+                                            contains a backup of your paper library.</p>
+                                    </div>
+                                </div>
+                                <div class="instruction-step">
+                                    <span class="step-number">2</span>
+                                    <div class="step-content">
+                                        <strong data-i18n="import_export_upload_title">Upload ZIP file</strong>
+                                        <p data-i18n="import_export_upload_desc">Drag the exported ZIP file into the area above or click "Choose file" to
+                                            select it.</p>
+                                    </div>
+                                </div>
+                                <div class="instruction-step">
+                                    <span class="step-number">3</span>
+                                    <div class="step-content">
+                                        <strong data-i18n="import_export_auto_title">Automatic import</strong>
+                                        <p data-i18n="import_export_auto_desc">The system will automatically parse the ZIP file and import all papers,
+                                            folder structure, translations, and analyses. This may take some time.</p>
+                                    </div>
+                                </div>
+                                <div class="instruction-step">
+                                    <span class="step-number">4</span>
+                                    <div class="step-content">
+                                        <strong data-i18n="import_export_view_title">View results</strong>
+                                        <p data-i18n="import_export_view_desc">After import completes, you can view the imported papers and folder structure
+                                            in the main interface.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Panel -->
+            <div class="setting-panel" id="setting-panel-export" style="display:none;">
+                <div class="panel-header">
+                    <h2><i class="fas fa-file-export"></i> <span data-i18n="export_title">Export Data</span></h2>
+                    <p data-i18n="export_subtitle_full">Export your paper library data to restore on another server or installation</p>
+                </div>
+
+                <div class="setting-card">
+                    <div class="setting-card-header">
+                        <i class="fas fa-box-archive"></i>
+                        <span data-i18n="export_notes">Export notes</span>
+                    </div>
+                    <div class="setting-card-body">
+                        <div class="export-info-box export-warning-box">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <strong data-i18n="export_browser_limits">Browser limitations</strong>
+                                <p data-i18n="export_limits_desc">Due to browser upload size limits, Export only includes JSON metadata and
+                                        folder structure, not PDF files, AI translations, or AI analyses.</p>
+                                <p data-i18n="export_limits_import_hint">When importing, the system will re-download PDFs from arXiv.</p>
+                            </div>
+                        </div>
+
+                        <div class="export-info-box">
+                            <i class="fas fa-server"></i>
+                            <div>
+                                <strong data-i18n="export_full_migration">Full data migration</strong>
+                                <p data-i18n="export_full_migration_desc">To migrate full data including PDFs, translations, and analyses, copy the entire
+                                    papers directory on the server:
+                                </p>
+                                <code id="papers-dir-path"
+                                    style="display: block; margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; word-break: break-all;">Loading...</code>
+                            </div>
+                        </div>
+
+                        <div class="export-info-box">
+                            <i class="fas fa-info-circle"></i>
+                            <div class="export-info-text">
+                                <p><strong data-i18n="export_includes">Export includes:</strong></p>
+                                <ul>
+                                    <li data-i18n="export_includes_folder">Full folder/category structure</li>
+                                    <li data-i18n="export_includes_metadata">All paper metadata (title, authors, abstract, etc.)</li>
+                                    <li data-i18n="export_includes_reading_list">Reading list</li>
+                                    <li data-i18n="export_includes_history">Reading history</li>
+                                    <li data-i18n="export_includes_settings">User settings (avatar, preferences, etc.)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="export-actions">
+                            <button id="btn-start-export" class="btn btn-primary">
+                                <i class="fas fa-download"></i>
+                                <span data-i18n="export_btn_start">Start export</span>
+                            </button>
+                        </div>
+
+                        <!-- Export progress -->
+                        <div id="export-progress-container" style="display:none; margin-top: 20px;">
+                            <div class="export-progress-header">
+                                <span id="export-status-text" data-i18n="export_status_exporting">Exporting...</span>
+                                <span id="export-progress-text">0 / 0</span>
+                            </div>
+                            <div class="export-progress-bar">
+                                <div id="export-progress-fill" class="export-progress-fill" style="width: 0%;"></div>
+                            </div>
+                            <div id="export-current-paper" class="export-current-paper"></div>
+                            <div class="export-actions" style="margin-top: 15px;">
+                                <button id="btn-download-export" class="btn btn-success" style="display:none;">
+                                    <i class="fas fa-file-download"></i>
+                                    <span data-i18n="export_btn_download">Download export file</span>
+                                </button>
+                                <button id="btn-cancel-export" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i>
+                                    <span data-i18n="export_btn_cancel">Cancel export</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export instructions -->
+                <div class="setting-card">
+                    <div class="setting-card-header">
+                        <i class="fas fa-info-circle"></i>
+                        <span data-i18n="settings_usage">Usage</span>
+                    </div>
+                    <div class="setting-card-body">
+                        <div class="import-instructions">
+                            <div class="instruction-step">
+                                <span class="step-number">1</span>
+                                <div class="step-content">
+                                    <strong data-i18n="export_usage_step1_title">Start export</strong>
+                                    <p data-i18n="export_usage_step1_desc">Click "Start export" and the system will collect all paper JSON metadata and
+                                        folder structure into a ZIP file.</p>
+                                </div>
+                            </div>
+                            <div class="instruction-step">
+                                <span class="step-number">2</span>
+                                <div class="step-content">
+                                    <strong data-i18n="export_usage_step2_title">Download and save</strong>
+                                    <p data-i18n="export_usage_step2_desc">After export finishes, click "Download export file". The ZIP contains paper
+                                        metadata, category structure, and configuration.</p>
+                                </div>
+                            </div>
+                            <div class="instruction-step">
+                                <span class="step-number">3</span>
+                                <div class="step-content">
+                                    <strong data-i18n="export_usage_step3_title">Import into a new environment</strong>
+                                    <p data-i18n="export_usage_step3_desc">In a new environment, go to the Import panel and upload the exported ZIP file.
+                                        The system will restore the folder structure and re-download PDFs from arXiv.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="modal-title">Title</h4>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Modal content -->
+            </div>
+            <div class="modal-footer">
+                <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+                <button id="modal-confirm" class="btn btn-primary">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div id="chat-modal" class="modal">
+        <div class="modal-content chat-modal-content">
+            <div class="modal-header">
+                <h4 id="chat-modal-title"><i class="fas fa-comments"></i> Chat with Paper</h4>
+                <span class="close" id="chat-modal-close">&times;</span>
+            </div>
+            <div class="modal-body chat-modal-body">
+                <div class="chat-container">
+                    <!-- Sidebar -->
+                    <div class="chat-sidebar">
+                        <div class="chat-sidebar-header">
+                            <button id="chat-new-session-btn" class="new-chat-btn">
+                                <i class="fas fa-plus"></i> New Chat
+                            </button>
+                            <span class="chat-sidebar-title">History</span>
+                        </div>
+                        <div id="chat-session-list" class="chat-session-list">
+                            <!-- Sessions will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Main Chat Area -->
+                    <div class="chat-main-area">
+                        <div id="chat-messages" class="chat-messages-container">
+                            <!-- Messages will appear here -->
+                        </div>
+                        <div class="modal-footer chat-modal-footer">
+                            <div class="chat-input-container">
+                                <div class="chat-input-toolbar">
+                                    <button id="chat-common-prompts-btn" type="button" class="chat-common-prompts-btn">
+                                        <i class="fas fa-list"></i> 常用问题
+                                    </button>
+                                    <div class="chat-slash-hint">输入 <span class="chat-slash-key">/</span> 选择常用问题</div>
+                                </div>
+                                <div class="chat-input-row">
+                                    <textarea id="chat-input" placeholder="Ask a question about the paper..." rows="1"></textarea>
+                                    <button id="chat-send-btn" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                                </div>
+                                <div id="chat-prompt-dropdown" class="chat-prompt-dropdown"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category context menu -->
+    <div id="context-menu" class="context-menu">
+        <ul>
+            <li id="rename-category"><i class="fas fa-edit"></i> Rename</li>
+            <li id="add-subcategory"><i class="fas fa-plus"></i> Add subcategory</li>
+            <li id="toggle-pin-category"><i class="fas fa-thumbtack"></i> <span id="pin-text">Pin</span></li>
+            <li id="change-icon-color" class="has-submenu">
+                <i class="fas fa-palette"></i> Change icon color
+                <i class="fas fa-chevron-right submenu-arrow"></i>
+                <div class="color-submenu">
+                    <div class="color-option" data-color="#7d4a9d"
+                        style="background: linear-gradient(135deg, #e8d9f2 0%, #dfc8ec 50%, #d6b7e6 100%);"
+                        title="Purple (default)"></div>
+                    <div class="color-option" data-color="#5b8fd8"
+                        style="background: linear-gradient(135deg, #d0e8f8 0%, #b8daf2 50%, #a5d0ed 100%);"
+                        title="Blue"></div>
+                    <div class="color-option" data-color="#66bb6a"
+                        style="background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 50%, #81c784 100%);"
+                        title="Green"></div>
+                    <div class="color-option" data-color="#ef5350"
+                        style="background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 50%, #e57373 100%);" title="Red">
+                    </div>
+                    <div class="color-option" data-color="#ab47bc"
+                        style="background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 50%, #ce93d8 100%);"
+                        title="Deep purple"></div>
+                    <div class="color-option" data-color="#ffa726"
+                        style="background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 50%, #ffb74d 100%);"
+                        title="Orange"></div>
+                    <div class="color-option" data-color="#26c6da"
+                        style="background: linear-gradient(135deg, #b2ebf2 0%, #80deea 50%, #4dd0e1 100%);"
+                        title="Cyan"></div>
+                    <div class="color-option" data-color="#ec407a"
+                        style="background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 50%, #f48fb1 100%);"
+                        title="Pink"></div>
+                    <div class="color-option" data-color="#78909c"
+                        style="background: linear-gradient(135deg, #cfd8dc 0%, #b0bec5 50%, #90a4ae 100%);"
+                        title="Gray"></div>
+                </div>
+            </li>
+            <li class="menu-divider"></li>
+            <li id="export-bibtex"><i class="fas fa-download"></i> Export bibTeX</li>
+            <li id="copy-arxiv-urls"><i class="fas fa-copy"></i> Copy arXiv URLs</li>
+            <li id="delete-category"><i class="fas fa-trash"></i> Delete</li>
+        </ul>
+    </div>
+
+    <!-- Paper context menu -->
+    <div id="paper-context-menu" class="context-menu">
+        <ul>
+            <li id="paper-refresh-metadata"><i class="fas fa-sync-alt"></i> Refresh metadata</li>
+            <li id="paper-translate"><i class="fas fa-language"></i> AI Translate</li>
+            <li id="paper-analyze"><i class="fas fa-brain"></i> AI interpret</li>
+            <li id="paper-delete"><i class="fas fa-trash"></i> Delete paper</li>
+        </ul>
+    </div>
+
+    <!-- Global loading indicator -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <!-- Institution edit modal -->
+    <div id="institution-modal" class="institution-modal" style="display: none;">
+        <div class="institution-modal-overlay" onclick="closeInstitutionModal()"></div>
+        <div class="institution-modal-container">
+            <div class="institution-modal-header">
+                <div class="institution-modal-title-group">
+                    <i class="fas fa-university"></i>
+                    <h3 id="institution-modal-title">Add institution mapping</h3>
+                </div>
+                <button class="institution-modal-close" onclick="closeInstitutionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="institution-modal-body">
+                <!-- Abbreviation input -->
+                <div class="institution-form-group">
+                    <label class="institution-label">
+                        <i class="fas fa-tag"></i>
+                        <span data-i18n="inst_standard_abbr">Standard abbreviation</span>
+                    </label>
+                    <input type="text" id="modal-institution-abbr" class="institution-input"
+                        data-i18n-placeholder="inst_abbr_placeholder" placeholder="e.g., ZJU, MIT, THU" autocomplete="off" />
+                    <span class="institution-help" data-i18n="inst_abbr_hint">Short name shown in filters</span>
+                </div>
+
+                <!-- Variant list -->
+                <div class="institution-form-group">
+                    <label class="institution-label">
+                        <i class="fas fa-list"></i>
+                        <span data-i18n="inst_fullname_variants">Full-name variants</span>
+                        <span class="variant-count" id="variant-count">0 items</span>
+                    </label>
+                    <div class="institution-variants-container" id="modal-variants-list">
+                        <!-- Variant tags will be shown here -->
+                    </div>
+                </div>
+
+                <!-- Add variant input -->
+                <div class="institution-form-group">
+                    <div class="institution-add-variant">
+                        <input type="text" id="modal-new-variant" class="institution-input"
+                            data-i18n-placeholder="inst_new_variant_placeholder" placeholder="Type full institution name (e.g., Zhejiang University) and press Enter"
+                            autocomplete="off" />
+                        <button class="institution-add-btn" onclick="addVariantInModal()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="institution-modal-footer">
+                <button id="institution-modal-delete" class="institution-btn institution-btn-danger"
+                    onclick="deleteInstitutionInModal()" style="display: none;">
+                    <i class="fas fa-trash-alt"></i>
+                    <span data-i18n="inst_delete">Delete institution</span>
+                </button>
+                <div class="institution-modal-actions">
+                    <button class="institution-btn institution-btn-cancel" onclick="closeInstitutionModal()">
+                        <span data-i18n="inst_cancel">Cancel</span>
+                    </button>
+                    <button class="institution-btn institution-btn-primary" onclick="saveInstitutionInModal()">
+                        <i class="fas fa-check"></i>
+                        <span data-i18n="inst_save">Save</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onboarding modal -->
+    <div id="onboarding-modal" class="onboarding-modal" style="display: none;">
+        <div class="onboarding-overlay" onclick="closeOnboardingModal()"></div>
+        <div class="onboarding-card">
+            <div class="onboarding-header">
+                <h2><i class="fas fa-graduation-cap"></i> <span data-i18n="onboarding_welcome">Welcome to PaperLens</span></h2>
+                <button class="onboarding-close" onclick="closeOnboardingModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="onboarding-body">
+                <!-- Language Selection (at the top) -->
+                <div class="onboarding-step"
+                    style="border-bottom: 2px solid #e0e0e0; padding-bottom: 20px; margin-bottom: 20px;">
+                    <div class="onboarding-step-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <div class="onboarding-step-content">
+                        <h3 data-i18n="onboarding_ai_language">Select AI Output Language</h3>
+                        <p style="margin-bottom: 12px;" data-i18n="onboarding_ai_language_hint">Choose the language for AI-generated content (translation,
+                            interpretation, and Daily arXiv summaries):</p>
+                        <select id="onboarding-ai-language" class="setting-input"
+                            style="width: 200px; font-size: 14px; padding: 8px;">
+                            <option value="zh" data-i18n="agentic_lang_chinese">Chinese</option>
+                            <option value="en" data-i18n="agentic_lang_english">English</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="onboarding-step">
+                    <div class="onboarding-step-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="onboarding-step-content">
+                        <h3 data-i18n="onboarding_step1">1. Configure AI features</h3>
+                        <p data-i18n="onboarding_step1_hint">Click <strong>top-right avatar → Agentic</strong> to set LLM API and MinerU services. This is
+                            required for AI translation, AI analysis, and Daily arXiv.</p>
+                    </div>
+                </div>
+                <div class="onboarding-step">
+                    <div class="onboarding-step-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="onboarding-step-content">
+                        <h3 data-i18n="onboarding_step2">2. Basic operations</h3>
+                        <p data-i18n="onboarding_step2_hint">Upload PDF papers, create folders to organize them, and use search to find papers. Click a
+                            paper to view details, double-click to open the reader.</p>
+                    </div>
+                </div>
+                <div class="onboarding-step">
+                    <div class="onboarding-step-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="onboarding-step-content">
+                        <h3 data-i18n="onboarding_step3">3. Agentic Tools</h3>
+                        <p data-i18n="onboarding_step3_hint">Supports <strong>AI analysis</strong> and <strong>AI translation</strong>. AI analysis
+                            converts a paper into a detailed Markdown interpretation; AI translation generates bilingual
+                            (EN-ZH) PDFs. In the paper list, select papers and use the context menu or batch actions.
+                        </p>
+                    </div>
+                </div>
+                <div class="onboarding-step">
+                    <div class="onboarding-step-icon">
+                        <img src="{{ url_for('static', filename='images/arxiv-logo.svg') }}" alt="arXiv"
+                            class="onboarding-arxiv-icon">
+                    </div>
+                    <div class="onboarding-step-content">
+                        <h3 data-i18n="onboarding_step4">4. Daily arXiv</h3>
+                        <p data-i18n="onboarding_step4_hint">Automatically fetches the latest arXiv papers, with filters by institution, country, and
+                            keywords. You can import interesting papers into your main library with one click.</p>
+                    </div>
+                </div>
+                <div class="onboarding-step">
+                    <div class="onboarding-step-icon">
+                        <i class="fas fa-file-import"></i>
+                    </div>
+                    <div class="onboarding-step-content">
+                        <h3 data-i18n="onboarding_step5">5. Import from Zotero</h3>
+                        <p data-i18n="onboarding_step5_hint">You can import your Zotero library. Go to <strong>top-right avatar → Import</strong>, upload
+                            the RDF file exported from Zotero, and the system will automatically download PDFs and
+                            restore folder structure.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="onboarding-footer">
+                <label class="onboarding-checkbox">
+                    <input type="checkbox" id="onboarding-dont-show">
+                    <span data-i18n="onboarding_dont_show">Don't show again</span>
+                </label>
+                <button class="btn btn-primary" onclick="closeOnboardingModal()" data-i18n="onboarding_get_started">
+                    Get started
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="login-overlay" style="display: none;">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="{{ url_for('static', filename='images/website_logo.svg') }}" alt="PaperLens Logo"
+                    class="login-logo" onerror="this.style.display='none'">
+                <h2 id="auth-title" data-i18n="login_title">Log In</h2>
+                <p data-i18n="login_welcome">Welcome to PaperLens Paper Reading</p>
+            </div>
+            <form id="auth-form" class="auth-form">
+                <div class="form-group">
+                    <label for="auth-email" data-i18n="login_email">Email</label>
+                    <input type="email" id="auth-email" required data-i18n-placeholder="login_email_placeholder" placeholder="name@example.com" class="auth-input">
+                </div>
+                <div class="form-group">
+                    <label for="auth-password" data-i18n="login_password">Password</label>
+                    <input type="password" id="auth-password" required data-i18n-placeholder="login_password_placeholder" placeholder="Enter your password"
+                        class="auth-input">
+                </div>
+                <div id="auth-error" class="auth-error" style="display: none;"></div>
+                <button type="submit" id="auth-submit" class="btn btn-primary btn-block" data-i18n="login_submit">Log In</button>
+            </form>
+            <div class="auth-footer">
+                <span id="auth-toggle-text" data-i18n="login_no_account">Don't have an account?</span>
+                <button id="toggle-auth-mode" class="btn-link" data-i18n="login_sign_up">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CDN Fallback Mechanism -->
+    <script>
+        (function () {
+            'use strict';
+
+            // CDN fallback configuration
+            const cdnFallbacks = {
+                marked: [
+                    'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
+                    'https://cdn.bootcdn.net/ajax/libs/marked/9.1.6/marked.min.js',
+                    'https://unpkg.com/marked/marked.min.js'
+                ],
+                hljs: [
+                    'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js',
+                    'https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/highlight.min.js'
+                ]
+            };
+
+            let fallbackAttempts = { marked: 0, hljs: 0 };
+
+            // Load script with fallback
+            function loadScriptWithFallback(name, urls, index = 0) {
+                if (index >= urls.length) {
+                    console.error(`❌ All CDN sources failed for ${name}`);
+                    if (name === 'marked') {
+                        const msg = '⚠️ Markdown rendering library failed to load.\n' +
+                            'AI analysis may not display properly.\n\n' +
+                            'Solutions:\n' +
+                            '1. Check network connection\n' +
+                            '2. Disable ad blockers\n' +
+                            '3. Try a different browser\n' +
+                            '4. Contact administrator';
+                        console.error(msg);
+                    }
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = urls[index];
+                script.async = false;
+
+                script.onload = function () {
+                    console.log(`✅ ${name} loaded from: ${urls[index]}`);
+                };
+
+                script.onerror = function () {
+                    console.warn(`⚠️ Failed to load ${name} from: ${urls[index]}`);
+                    loadScriptWithFallback(name, urls, index + 1);
+                };
+
+                document.head.appendChild(script);
+            }
+
+            // Check and load missing libraries after a short delay
+            setTimeout(function () {
+                // Check Marked.js
+                if (typeof marked === 'undefined') {
+                    console.warn('Marked.js not loaded, trying fallback sources...');
+                    loadScriptWithFallback('marked', cdnFallbacks.marked, 0);
+                } else {
+                    console.log('✅ Marked.js already loaded');
+                }
+
+                // Check Highlight.js
+                if (typeof hljs === 'undefined') {
+                    console.warn('Highlight.js not loaded, trying fallback sources...');
+                    loadScriptWithFallback('hljs', cdnFallbacks.hljs, 0);
+                } else {
+                    console.log('✅ Highlight.js already loaded');
+                }
+
+                // Check MathJax
+                if (typeof MathJax === 'undefined') {
+                    console.warn('⚠️ MathJax not loaded - mathematical formulas may not render');
+                } else {
+                    console.log('✅ MathJax already loaded');
+                }
+            }, 1000);
+        })();
+    </script>
+
+    <!-- Main App Logic -->
+    <!-- app.js will be dynamically loaded by auth.js after authentication -->
+    <!-- <script src="{{ url_for('static', filename='js/app.js') }}?v=1.1"></script> -->
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}?v=2.4"></script>
+</body>
+
+</html>

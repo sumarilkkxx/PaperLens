@@ -1,0 +1,55 @@
+[project]
+name = "paperlens"
+version = "0.1.0"
+description = "PaperLens: A fully open-source, modern paper reading and management platform for Vibe Coding"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "CC BY-NC 4.0"}
+authors = [
+    {name = "PaperLens Team"}
+]
+keywords = ["paper", "research", "pdf", "arxiv", "ai", "translation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "Flask==2.3.3",
+    "Werkzeug==2.3.7",
+    "PyPDF2==3.0.1",
+    "PyMuPDF==1.25.2",
+    "arxiv>=2.3.0",
+    "openai>=1.70.0,<2",
+    "requests>=2.32.3",
+    "rdflib==7.5.0",
+    "Pillow==11.3.0",
+    "mineru==2.5.3",
+    "BabelDOC==0.5.13",
+    "mineru_vl_utils==0.1.16",
+    "python-dotenv>=1.2.1",
+]
+
+[project.optional-dependencies]
+local = [] 
+server = [
+    "mineru[vlm]==2.5.3",
+    "mineru[pipeline]==2.5.3",
+    "mineru[api]==2.5.3",
+    "mineru[vllm]==2.5.3",
+    "huggingface-hub>=0.20.0",
+    "modelscope>=1.17.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["paperlens"]
+

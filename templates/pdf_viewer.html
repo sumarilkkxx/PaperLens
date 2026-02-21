@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ paper_title or 'PDF Viewer' }} - PaperLens</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/website_logo.svg') }}">
+    <link rel="alternate icon" type="image/png" href="{{ url_for('static', filename='images/website_logo.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-purple.css') }}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #2c2c2c;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #1a1a1a;
+            border-bottom: 1px solid #444;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: white;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .pdf-container {
+            height: calc(100vh - 60px);
+            width: 100%;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            flex-direction: column;
+            color: #ccc;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #444;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body data-use-chinese="{{ 'true' if use_chinese else 'false' }}">
+    <script>
+        window.__SUPABASE_URL = {{ supabase_url | tojson }};
+        window.__SUPABASE_ANON_KEY = {{ supabase_anon_key | tojson }};
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2';"></script>
+    <script src="{{ url_for('static', filename='js/api_auth_patch.js') }}?v=1"></script>
+    <div class="header">
+        <div>
+            <button id="back-btn" class="btn btn-secondary" title="Close current tab (Ctrl+W)">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+        <h3 id="pdf-title">{{ paper_title or 'PDF Viewer' }}</h3>
+        <div>
+            <a href="/api/paper/{{ paper_id }}/file" class="btn btn-secondary" download>
+                <i class="fas fa-download"></i> Download
+            </a>
+        </div>
+    </div>
+    
+    <div class="pdf-container">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Loading PDF viewer...</p>
+        </div>
+        <iframe 
+            id="pdf-iframe" 
+            style="display: none;"
+            src=""
+            title="PDF Viewer">
+        </iframe>
+    </div>
+    
+    <script>
+        // Get paper information and set title
+        async function loadPaperInfo() {
+            try {
+                const response = await fetch('/api/paper/{{ paper_id }}');
+                if (response.ok) {
+                    const paper = await response.json();
+                    const resolvedTitle = paper.title || paper.filename || 'PDF Viewer';
+                    const titleEl = document.getElementById('pdf-title');
+                    if (titleEl) {
+                        titleEl.textContent = resolvedTitle;
+                    }
+                    document.title = resolvedTitle;
+                }
+            } catch (error) {
+                console.error('Failed to load paper info:', error);
+            }
+        }
+        
+        // initialization PDF Viewer
+        function initPDFViewer() {
+            const iframe = document.getElementById('pdf-iframe');
+            const loading = document.getElementById('loading');
+            
+            // Check whether to use Chinese version (from data attribute)
+            const useChinese = (document.body.getAttribute('data-use-chinese') === 'true');
+            let pdfUrl = window.location.origin + '/api/paper/{{ paper_id }}/file';
+            
+            if (useChinese) {
+                pdfUrl = window.location.origin + '/api/paper/{{ paper_id }}/chinese/file';
+            }
+            
+            console.log('PDF URL:', pdfUrl);
+            console.log('Use Chinese version:', useChinese);
+            
+            // Use fetch to check if file exists
+            fetch(pdfUrl, { method: 'HEAD' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    console.log('PDF file check succeeded');
+                    
+                    // Load the raw PDF in iframe to avoid cross-origin issues
+                    iframe.src = pdfUrl;
+                    
+                    // Listen for iframe load
+                    iframe.onload = function() {
+                        console.log('PDF iframe loaded');
+                        loading.style.display = 'none';
+                        iframe.style.display = 'block';
+                    };
+                    
+                    // Timeout: if not loaded in 10s, show error
+                    setTimeout(() => {
+                        if (loading.style.display !== 'none') {
+                            console.error('PDF load timeout');
+                            loading.innerHTML = `
+                                <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 15px;"></i>
+                                <p style="color: #dc3545;">PDF load timeout</p>
+                                <p style="color: #999; font-size: 12px; margin-top: 10px;">Please check if the PDF file exists, or try downloading directly.</p>
+                                <button class="btn" onclick="location.reload()" style="margin-top: 15px;">Reload</button>
+                                <a href="${pdfUrl}" class="btn btn-secondary" download style="margin-top: 10px; margin-left: 10px;">Download PDF</a>
+                            `;
+                        }
+                    }, 10000);
+                })
+                .catch(error => {
+                    console.error('PDF file check failed:', error);
+                    loading.innerHTML = `
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 15px;"></i>
+                        <p style="color: #dc3545;">PDF load failed</p>
+                        <p style="color: #999; font-size: 12px; margin-top: 10px;">Error: ${error.message}</p>
+                        <button class="btn" onclick="location.reload()" style="margin-top: 15px;">Reload</button>
+                        <a href="${pdfUrl}" class="btn btn-secondary" download style="margin-top: 10px; margin-left: 10px;">Download PDF</a>
+                    `;
+                });
+            
+            // Fallback error handler
+            iframe.onerror = function() {
+                console.error('PDF iframe load error');
+                loading.innerHTML = `
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 15px;"></i>
+                    <p style="color: #dc3545;">PDF load failed</p>
+                    <button class="btn" onclick="location.reload()">Reload</button>
+                    <a href="${pdfUrl}" class="btn btn-secondary" download style="margin-top: 10px; margin-left: 10px;">Download PDF</a>
+                `;
+            };
+        }
+        
+        // Close window helper
+        function closeWindow() {
+            if (window.opener) {
+                window.close();
+            } else {
+                const closed = window.close();
+                setTimeout(() => {
+                    if (!closed && !window.closed) {
+                        window.location.href = '/';
+                    }
+                }, 100);
+            }
+        }
+        
+        // Back button wiring
+        function setupBackButton() {
+            const backBtn = document.getElementById('back-btn');
+            backBtn.addEventListener('click', closeWindow);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
+                    e.preventDefault();
+                    closeWindow();
+                }
+                if (e.key === 'Escape') {
+                    closeWindow();
+                }
+            });
+        }
+        
+        // Reading time tracking
+        let readStartTime = null;
+        let readTimeInterval = null;
+        let lastRecordedSeconds = 0; // last recorded seconds
+        let lastActivityTime = null; // last user activity timestamp
+        let isTimerActive = true; // whether timer is active (for inactivity detection)
+        let activityCheckInterval = null; // inactivity checker
+        const INACTIVITY_THRESHOLD = 60000; // 1 minute
+        const TIMER_INTERVAL = 10000; // 10 seconds (reduced from 30s for better accuracy)
+        let isPageUnloading = false; // Flag to track if page is unloading
+        
+        // Format date as YYYY-MM-DD (local time)
+        function formatDateLocal(date) {
+            const d = date || new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // User activity handler
+        function recordUserActivity() {
+            const now = Date.now();
+            const wasInactive = !isTimerActive;
+            lastActivityTime = now;
+            
+            if (wasInactive) {
+                console.log('User activity detected, resume timing');
+                isTimerActive = true;
+                readStartTime = now;
+            }
+        }
+        
+        // Check for long inactivity
+        function checkUserActivity() {
+            if (!lastActivityTime || !isTimerActive) {
+                return;
+            }
+            
+            const now = Date.now();
+            const timeSinceLastActivity = now - lastActivityTime;
+            
+            if (timeSinceLastActivity > INACTIVITY_THRESHOLD && isTimerActive) {
+                console.log('Inactivity > 1 minute, pause timing');
+                isTimerActive = false;
+                if (readStartTime) {
+                    const elapsed = Math.floor((lastActivityTime - readStartTime) / 1000);
+                    const incrementSeconds = elapsed - lastRecordedSeconds;
+                    
+                    if (incrementSeconds > 0) {
+                        console.log('Saving reading time before inactivity:', incrementSeconds, 'seconds');
+                        sendReadingTime(incrementSeconds, false);
+                        recordDailyReadingTime(incrementSeconds);
+                        lastRecordedSeconds += incrementSeconds;
+                    }
+                }
+            }
+        }
+        
+        // Start monitoring activity
+        function startActivityMonitoring() {
+            const activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+            
+            activityEvents.forEach(eventType => {
+                document.addEventListener(eventType, recordUserActivity, { passive: true });
+                const iframe = document.getElementById('pdf-iframe');
+                if (iframe) {
+                    try {
+                        iframe.contentWindow?.document?.addEventListener(eventType, recordUserActivity, { passive: true });
+                    } catch (e) {
+                        // Cross-origin, ignore
+                    }
+                }
+            });
+            
+            lastActivityTime = Date.now();
+            isTimerActive = true;
+            
+            activityCheckInterval = setInterval(checkUserActivity, 10000);
+            
+            console.log('Activity monitoring started');
+        }
+        
+        // Stop monitoring
+        function stopActivityMonitoring() {
+            if (activityCheckInterval) {
+                clearInterval(activityCheckInterval);
+                activityCheckInterval = null;
+            }
+            console.log('Activity monitoring stopped');
+        }
+        
+        // Send reading time to server (with sendBeacon support for page unload)
+        function sendReadingTime(seconds, useBeacon = false) {
+            if (seconds <= 0) return;
+            
+            const url = `/api/paper/{{ paper_id }}/read-time`;
+            const data = JSON.stringify({ increment: seconds });
+            
+            if (useBeacon && navigator.sendBeacon) {
+                // Use sendBeacon for reliable delivery during page unload
+                const blob = new Blob([data], { type: 'application/json' });
+                const sent = navigator.sendBeacon(url, blob);
+                if (sent) {
+                    console.log('Reading time sent via sendBeacon:', seconds, 'seconds');
+                } else {
+                    console.warn('sendBeacon failed, falling back to fetch');
+                    // Fallback to fetch with keepalive
+                    fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: data,
+                        keepalive: true
+                    }).catch(err => console.error('Failed to record reading time:', err));
+                }
+            } else {
+                // Normal fetch request
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: data,
+                    keepalive: useBeacon // Use keepalive if requested
+                }).catch(err => console.error('Failed to record reading time:', err));
+            }
+        }
+        
+        // Record daily reading time to server (and localStorage as backup)
+        function recordDailyReadingTime(seconds) {
+            if (seconds <= 0) return;
+            
+            const today = formatDateLocal(new Date());
+            const minutes = Math.ceil(seconds / 60);
+            
+            fetch('/api/settings/reading-history/record', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ minutes, date: today })
+            }).then(response => {
+                if (response.ok) {
+                    console.log(`Recorded daily reading time: ${minutes} minutes`);
+                }
+            }).catch(err => {
+                console.error('Failed to record daily reading time:', err);
+            });
+            
+            try {
+                const key = 'dailyReadingData';
+                let data = {};
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    data = JSON.parse(saved);
+                }
+                data[today] = (data[today] || 0) + minutes;
+                
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - 400);
+                const cutoffStr = formatDateLocal(cutoffDate);
+                Object.keys(data).forEach(date => {
+                    if (date < cutoffStr) {
+                        delete data[date];
+                    }
+                });
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+                console.error('Failed to save to localStorage:', e);
+            }
+        }
+        
+        function startReadingTimer() {
+            readStartTime = Date.now();
+            lastRecordedSeconds = 0;
+            isTimerActive = true;
+            console.log('Start recording reading time');
+            
+            startActivityMonitoring();
+            
+            readTimeInterval = setInterval(function() {
+                if (readStartTime && isTimerActive && !isPageUnloading) {
+                    const now = Date.now();
+                    const elapsed = Math.floor((now - readStartTime) / 1000);
+                    const incrementSeconds = elapsed - lastRecordedSeconds;
+                    
+                    if (incrementSeconds > 0) {
+                        sendReadingTime(incrementSeconds, false);
+                        recordDailyReadingTime(incrementSeconds);
+                        lastRecordedSeconds = elapsed;
+                    }
+                }
+            }, TIMER_INTERVAL);
+        }
+        
+        function stopReadingTimer(useBeacon = false) {
+            stopActivityMonitoring();
+            
+            if (readStartTime && isTimerActive) {
+                const now = Date.now();
+                const elapsed = Math.floor((now - readStartTime) / 1000);
+                const incrementSeconds = elapsed - lastRecordedSeconds;
+                console.log('Stop recording reading time, increment:', incrementSeconds, 'seconds', useBeacon ? '(using beacon)' : '');
+                
+                if (incrementSeconds > 0) {
+                    // Use sendBeacon if page is unloading, otherwise use normal fetch
+                    sendReadingTime(incrementSeconds, useBeacon);
+                    recordDailyReadingTime(incrementSeconds);
+                }
+            }
+            
+            readStartTime = null;
+            lastRecordedSeconds = 0;
+            isTimerActive = false;
+            lastActivityTime = null;
+            
+            if (readTimeInterval) {
+                clearInterval(readTimeInterval);
+                readTimeInterval = null;
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setupBackButton();
+            loadPaperInfo();
+            initPDFViewer();
+            startReadingTimer();
+        });
+        
+        // Stop timer on unload (use sendBeacon for reliable delivery)
+        window.addEventListener('beforeunload', function() {
+            isPageUnloading = true;
+            stopReadingTimer(true); // Use sendBeacon when page is unloading
+        });
+        
+        // Also handle pagehide event (more reliable in some browsers)
+        window.addEventListener('pagehide', function() {
+            isPageUnloading = true;
+            stopReadingTimer(true); // Use sendBeacon when page is hiding
+        });
+        
+        // Pause/resume timer on visibility change
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopReadingTimer(false); // Normal fetch when just hiding
+            } else {
+                startReadingTimer();
+            }
+        });
+    </script>
+</body>
+</html>

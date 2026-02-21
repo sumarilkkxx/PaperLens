@@ -1,0 +1,953 @@
+{
+  "Princeton": [
+    "Princeton University"
+  ],
+  "MIT": [
+    "Massachusetts Institute of Technology"
+  ],
+  "Harvard": [
+    "Harvard University"
+  ],
+  "Stanford": [
+    "Stanford University"
+  ],
+  "Yale": [
+    "Yale University"
+  ],
+  "UPenn": [
+    "University of Pennsylvania",
+    "Penn"
+  ],
+  "Caltech": [
+    "California Institute of Technology"
+  ],
+  "Duke": [
+    "Duke University"
+  ],
+  "Brown": [
+    "Brown University"
+  ],
+  "JHU": [
+    "Johns Hopkins University",
+    "Johns Hopkins"
+  ],
+  "Northwestern": [
+    "Northwestern University",
+    "NU"
+  ],
+  "Columbia": [
+    "Columbia University"
+  ],
+  "Cornell": [
+    "Cornell University"
+  ],
+  "UChicago": [
+    "The University of Chicago",
+    "Chicago"
+  ],
+  "UC Berkeley": [
+    "University of California Berkeley",
+    "University of California, Berkeley",
+    "Cal",
+    "Berkeley"
+  ],
+  "UCLA": [
+    "University of California Los Angeles",
+    "University of California, Los Angeles"
+  ],
+  "Rice": [
+    "Rice University"
+  ],
+  "Dartmouth": [
+    "Dartmouth College"
+  ],
+  "Vanderbilt": [
+    "Vanderbilt University",
+    "Vandy"
+  ],
+  "Notre Dame": [
+    "University of Notre Dame",
+    "ND"
+  ],
+  "UMich": [
+    "University of Michigan",
+    "Ann Arbor",
+    "U of M"
+  ],
+  "WashU": [
+    "Washington University",
+    "Washington University in St. Louis",
+    "WUSTL"
+  ],
+  "Emory": [
+    "Emory University"
+  ],
+  "UNC": [
+    "University of North Carolina at Chapel Hill",
+    "UNC Chapel Hill"
+  ],
+  "CMU": [
+    "Carnegie Mellon University"
+  ],
+  "UVA": [
+    "University of Virginia"
+  ],
+  "USC": [
+    "University of Southern California"
+  ],
+  "UCSD": [
+    "University of California, San Diego",
+    "UC San Diego"
+  ],
+  "UF": [
+    "University of Florida"
+  ],
+  "UC Davis": [
+    "University of California, Davis",
+    "UCD"
+  ],
+  "UT Austin": [
+    "The University of Texas at Austin",
+    "UT",
+    "Texas"
+  ],
+  "NYU": [
+    "New York University"
+  ],
+  "GT": [
+    "Georgia Institute of Technology",
+    "Georgia Tech"
+  ],
+  "UCSB": [
+    "University of California, Santa Barbara"
+  ],
+  "UCI": [
+    "University of California, Irvine"
+  ],
+  "UIUC": [
+    "University of Illinois Urbana-Champaign",
+    "Illinois"
+  ],
+  "UW-Madison": [
+    "University of Wisconsin–Madison",
+    "Wisconsin"
+  ],
+  "BC": [
+    "Boston College"
+  ],
+  "Tufts": [
+    "Tufts University"
+  ],
+  "Rochester": [
+    "University of Rochester",
+    "U of R"
+  ],
+  "BU": [
+    "Boston University"
+  ],
+  "W&M": [
+    "William & Mary",
+    "College of William & Mary"
+  ],
+  "CWRU": [
+    "Case Western Reserve University",
+    "Case Western"
+  ],
+  "Tulane": [
+    "Tulane University"
+  ],
+  "NEU": [
+    "Northeastern University"
+  ],
+  "OSU": [
+    "The Ohio State University",
+    "Ohio State"
+  ],
+  "UGA": [
+    "University of Georgia"
+  ],
+  "Purdue": [
+    "Purdue University"
+  ],
+  "Lehigh": [
+    "Lehigh University"
+  ],
+  "Villanova": [
+    "Villanova University"
+  ],
+  "RPI": [
+    "Rensselaer Polytechnic Institute"
+  ],
+  "Pepperdine": [
+    "Pepperdine University"
+  ],
+  "UW": [
+    "University of Washington",
+    "UDub"
+  ],
+  "FSU": [
+    "Florida State University"
+  ],
+  "UMD": [
+    "University of Maryland",
+    "University of Maryland, College Park"
+  ],
+  "Miami": [
+    "University of Miami",
+    "The U"
+  ],
+  "Rutgers": [
+    "Rutgers University",
+    "Rutgers, The State University of New Jersey"
+  ],
+  "Pitt": [
+    "University of Pittsburgh"
+  ],
+  "Syracuse": [
+    "Syracuse University",
+    "Cuse"
+  ],
+  "PSU": [
+    "Pennsylvania State University",
+    "Penn State"
+  ],
+  "UConn": [
+    "University of Connecticut"
+  ],
+  "MSU": [
+    "Michigan State University"
+  ],
+  "TAMU": [
+    "Texas A&M University",
+    "Texas A&M"
+  ],
+  "NCSU": [
+    "North Carolina State University",
+    "NC State"
+  ],
+  "VT": [
+    "Virginia Tech",
+    "Virginia Polytechnic Institute and State University"
+  ],
+  "UMass": [
+    "University of Massachusetts Amherst",
+    "UMass Amherst"
+  ],
+  "UMN": [
+    "University of Minnesota, Twin Cities",
+    "Minnesota"
+  ],
+  "Indiana": [
+    "Indiana University Bloomington",
+    "IU"
+  ],
+  "Clemson": [
+    "Clemson University"
+  ],
+  "GWU": [
+    "George Washington University",
+    "GW"
+  ],
+  "Brandeis": [
+    "Brandeis University"
+  ],
+  "Georgetown": [
+    "Georgetown University"
+  ],
+  "Wake Forest": [
+    "Wake Forest University"
+  ],
+  "SCU": [
+    "Santa Clara University"
+  ],
+  "ASU": [
+    "Arizona State University"
+  ],
+  "BYU": [
+    "Brigham Young University"
+  ],
+  "UofT": [
+    "University of Toronto",
+    "Toronto"
+  ],
+  "McGill": [
+    "McGill University"
+  ],
+  "UBC": [
+    "University of British Columbia"
+  ],
+  "Waterloo": [
+    "University of Waterloo"
+  ],
+  "UAlberta": [
+    "University of Alberta"
+  ],
+  "McMaster": [
+    "McMaster University",
+    "Mac"
+  ],
+  "UdeM": [
+    "Université de Montréal",
+    "Montreal"
+  ],
+  "Western": [
+    "Western University",
+    "University of Western Ontario",
+    "UWO"
+  ],
+  "Queens": [
+    "Queen's University"
+  ],
+  "Calgary": [
+    "University of Calgary"
+  ],
+  "Ottawa": [
+    "University of Ottawa",
+    "uOttawa"
+  ],
+  "SFU": [
+    "Simon Fraser University"
+  ],
+  "Google": [
+    "Google",
+    "Google DeepMind",
+    "Google Research",
+    "Google Brain",
+    "Alphabet"
+  ],
+  "Microsoft": [
+    "Microsoft Corporation",
+    "Microsoft Research",
+    "MSR"
+  ],
+  "Meta": [
+    "Meta Platforms",
+    "Meta AI",
+    "FAIR",
+    "Facebook AI Research"
+  ],
+  "NVIDIA": [
+    "NVIDIA Corporation",
+    "NVIDIA Research"
+  ],
+  "Apple": [
+    "Apple Inc.",
+    "Apple Machine Learning Research"
+  ],
+  "Amazon": [
+    "Amazon.com",
+    "AWS",
+    "Amazon Science",
+    "Amazon Web Services"
+  ],
+  "IBM": [
+    "International Business Machines",
+    "IBM Research"
+  ],
+  "OpenAI": [
+    "OpenAI"
+  ],
+  "Anthropic": [
+    "Anthropic"
+  ],
+  "DeepMind": [
+    "Google DeepMind",
+    "DeepMind Technologies"
+  ],
+  "Baidu": [
+    "Baidu, Inc.",
+    "Baidu Research"
+  ],
+  "Tencent": [
+    "Tencent Holdings",
+    "Tencent AI Lab",
+    "Tencent Youtu Lab"
+  ],
+  "Alibaba": [
+    "Alibaba Group",
+    "Alibaba DAMO Academy",
+    "Alibaba Cloud",
+    "Ant Group",
+    "Qwen",
+    "Qwen Team"
+  ],
+  "Huawei": [
+    "Huawei Technologies",
+    "Huawei Noah",
+    "Huawei Noah's Ark Lab"
+  ],
+  "ByteDance": [
+    "ByteDance",
+    "TikTok",
+    "Seed",
+    "ByteDance AI Lab"
+  ],
+  "DeepSeek": [
+    "DeepSeek"
+  ],
+  "Samsung": [
+    "Samsung Electronics",
+    "Samsung Research",
+    "SAIT"
+  ],
+  "Intel": [
+    "Intel Corporation",
+    "Intel Labs"
+  ],
+  "AMD": [
+    "Advanced Micro Devices",
+    "AMD"
+  ],
+  "Qualcomm": [
+    "Qualcomm",
+    "Qualcomm AI Research"
+  ],
+  "Adobe": [
+    "Adobe Inc.",
+    "Adobe Research"
+  ],
+  "Salesforce": [
+    "Salesforce",
+    "Salesforce Research"
+  ],
+  "Uber": [
+    "Uber Technologies",
+    "Uber AI"
+  ],
+  "Tesla": [
+    "Tesla, Inc.",
+    "Tesla AI"
+  ],
+  "Snap": [
+    "Snap Inc.",
+    "Snap Research"
+  ],
+  "Netflix": [
+    "Netflix, Inc.",
+    "Netflix Research"
+  ],
+  "Airbnb": [
+    "Airbnb, Inc."
+  ],
+  "Oracle": [
+    "Oracle Corporation",
+    "Oracle Labs"
+  ],
+  "Cisco": [
+    "Cisco Systems"
+  ],
+  "SAP": [
+    "SAP SE",
+    "SAP AI"
+  ],
+  "Siemens": [
+    "Siemens AG",
+    "Siemens Technology"
+  ],
+  "Bosch": [
+    "Robert Bosch GmbH",
+    "Bosch Center for Artificial Intelligence",
+    "BCAI"
+  ],
+  "Sony": [
+    "Sony Group",
+    "Sony AI",
+    "Sony CSL"
+  ],
+  "Toyota": [
+    "Toyota Motor Corporation",
+    "Toyota Research Institute",
+    "TRI"
+  ],
+  "Naver": [
+    "Naver Corporation",
+    "Naver Labs",
+    "Naver AI Lab"
+  ],
+  "NEC": [
+    "NEC Corporation",
+    "NEC Laboratories"
+  ],
+  "Fujitsu": [
+    "Fujitsu Limited",
+    "Fujitsu Research"
+  ],
+  "Hitachi": [
+    "Hitachi, Ltd."
+  ],
+  "Panasonic": [
+    "Panasonic Corporation"
+  ],
+  "Databricks": [
+    "Databricks",
+    "MosaicML"
+  ],
+  "Hugging Face": [
+    "Hugging Face"
+  ],
+  "Cohere": [
+    "Cohere"
+  ],
+  "Mistral": [
+    "Mistral AI"
+  ],
+  "Stability AI": [
+    "Stability AI"
+  ],
+  "Midjourney": [
+    "Midjourney"
+  ],
+  "Scale AI": [
+    "Scale AI"
+  ],
+  "xAI": [
+    "xAI",
+    "X.AI"
+  ],
+  "JD.com": [
+    "JD.com",
+    "JD AI Research"
+  ],
+  "Mila": [
+    "Mila - Quebec AI Institute",
+    "Mila"
+  ],
+  "Vector": [
+    "Vector Institute"
+  ],
+  "AI2": [
+    "Allen Institute for AI",
+    "AI2"
+  ],
+  "THU": [
+    "Tsinghua University",
+    "THU"
+  ],
+  "PKU": [
+    "Peking University",
+    "PKU"
+  ],
+  "CAS": [
+    "Chinese Academy of Sciences",
+    "University of Chinese Academy of Sciences",
+    "UCAS",
+    "CASIA"
+  ],
+  "ZJU": [
+    "Zhejiang University",
+    "ZJU"
+  ],
+  "SJTU": [
+    "Shanghai Jiao Tong University",
+    "SJTU"
+  ],
+  "Fudan": [
+    "Fudan University"
+  ],
+  "USTC": [
+    "University of Science and Technology of China",
+    "USTC"
+  ],
+  "NJU": [
+    "Nanjing University",
+    "NJU"
+  ],
+  "HKU": [
+    "The University of Hong Kong",
+    "HKU"
+  ],
+  "HKUST": [
+    "The Hong Kong University of Science and Technology",
+    "HKUST",
+    "HKUST(GZ)"
+  ],
+  "CUHK": [
+    "The Chinese University of Hong Kong",
+    "CUHK"
+  ],
+  "PolyU": [
+    "The Hong Kong Polytechnic University",
+    "PolyU"
+  ],
+  "CityU": [
+    "City University of Hong Kong",
+    "CityU"
+  ],
+  "HIT": [
+    "Harbin Institute of Technology",
+    "HIT"
+  ],
+  "XJTU": [
+    "Xi'an Jiaotong University",
+    "XJTU"
+  ],
+  "WHU": [
+    "Wuhan University",
+    "WHU"
+  ],
+  "HUST": [
+    "Huazhong University of Science and Technology",
+    "HUST"
+  ],
+  "SYSU": [
+    "Sun Yat-sen University",
+    "SYSU"
+  ],
+  "BUAA": [
+    "Beihang University",
+    "BUAA"
+  ],
+  "Tongji": [
+    "Tongji University"
+  ],
+  "SEU": [
+    "Southeast University",
+    "SEU"
+  ],
+  "BIT": [
+    "Beijing Institute of Technology",
+    "BIT"
+  ],
+  "RUC": [
+    "Renmin University of China",
+    "RUC"
+  ],
+  "TJU": [
+    "Tianjin University",
+    "TJU"
+  ],
+  "NKU": [
+    "Nankai University",
+    "NKU"
+  ],
+  "Shandong": [
+    "Shandong University",
+    "SDU"
+  ],
+  "Jilin": [
+    "Jilin University",
+    "JLU"
+  ],
+  "Xiamen": [
+    "Xiamen University",
+    "XMU"
+  ],
+  "Sichuan": [
+    "Sichuan University",
+    "SCU"
+  ],
+  "UESTC": [
+    "University of Electronic Science and Technology of China",
+    "UESTC"
+  ],
+  "NWPU": [
+    "Northwestern Polytechnical University",
+    "NWPU"
+  ],
+  "DLUT": [
+    "Dalian University of Technology"
+  ],
+  "CSU": [
+    "Central South University"
+  ],
+  "SCUT": [
+    "South China University of Technology"
+  ],
+  "Hunan": [
+    "Hunan University"
+  ],
+  "CAU": [
+    "China Agricultural University"
+  ],
+  "Lanzhou": [
+    "Lanzhou University",
+    "LZU"
+  ],
+  "ECNU": [
+    "East China Normal University"
+  ],
+  "SUSTech": [
+    "Southern University of Science and Technology",
+    "SUSTech"
+  ],
+  "ShenzhenU": [
+    "Shenzhen University",
+    "SZU"
+  ],
+  "BUPT": [
+    "Beijing University of Posts and Telecommunications",
+    "BUPT"
+  ],
+  "XDU": [
+    "Xidian University"
+  ],
+  "Macau": [
+    "University of Macau",
+    "UM"
+  ],
+  "Oxford": [
+    "University of Oxford",
+    "Oxford University"
+  ],
+  "Cambridge": [
+    "University of Cambridge",
+    "Cambridge University"
+  ],
+  "Imperial": [
+    "Imperial College London"
+  ],
+  "ETH Zurich": [
+    "ETH Zurich",
+    "Swiss Federal Institute of Technology Zurich",
+    "ETH"
+  ],
+  "UCL": [
+    "University College London",
+    "UCL"
+  ],
+  "NUS": [
+    "National University of Singapore"
+  ],
+  "NTU": [
+    "Nanyang Technological University",
+    "Nanyang Tech"
+  ],
+  "EPFL": [
+    "EPFL",
+    "École Polytechnique Fédérale de Lausanne"
+  ],
+  "Edinburgh": [
+    "The University of Edinburgh",
+    "Edinburgh University"
+  ],
+  "TUM": [
+    "Technical University of Munich",
+    "TU Munich"
+  ],
+  "Melbourne": [
+    "The University of Melbourne",
+    "UniMelb"
+  ],
+  "UTokyo": [
+    "The University of Tokyo",
+    "Todai"
+  ],
+  "KAIST": [
+    "Korea Advanced Institute of Science and Technology",
+    "KAIST"
+  ],
+  "Manchester": [
+    "The University of Manchester"
+  ],
+  "KCL": [
+    "King's College London"
+  ],
+  "UNSW": [
+    "The University of New South Wales",
+    "UNSW Sydney"
+  ],
+  "ANU": [
+    "The Australian National University",
+    "ANU"
+  ],
+  "Sydney": [
+    "The University of Sydney",
+    "USyd"
+  ],
+  "Monash": [
+    "Monash University"
+  ],
+  "UQ": [
+    "The University of Queensland"
+  ],
+  "KyotoU": [
+    "Kyoto University"
+  ],
+  "SNU": [
+    "Seoul National University"
+  ],
+  "Sorbonne": [
+    "Sorbonne University",
+    "Sorbonne Université"
+  ],
+  "Paris-Saclay": [
+    "Université Paris-Saclay",
+    "Paris-Saclay"
+  ],
+  "PSL": [
+    "PSL Research University",
+    "Université PSL"
+  ],
+  "Amsterdam": [
+    "University of Amsterdam",
+    "UvA"
+  ],
+  "TUDelft": [
+    "Delft University of Technology",
+    "TU Delft"
+  ],
+  "KTH": [
+    "KTH Royal Institute of Technology",
+    "KTH"
+  ],
+  "Technion": [
+    "Technion – Israel Institute of Technology",
+    "Technion"
+  ],
+  "LMU Munich": [
+    "Ludwig Maximilian University of Munich",
+    "LMU"
+  ],
+  "Heidelberg": [
+    "Heidelberg University",
+    "Ruprecht Karl University of Heidelberg"
+  ],
+  "KU Leuven": [
+    "KU Leuven",
+    "Catholic University of Leuven"
+  ],
+  "Zurich": [
+    "University of Zurich",
+    "UZH"
+  ],
+  "Tokyo Tech": [
+    "Tokyo Institute of Technology",
+    "Institute of Science Tokyo"
+  ],
+  "Pohang": [
+    "Pohang University of Science and Technology",
+    "POSTECH"
+  ],
+  "Yonsei": [
+    "Yonsei University"
+  ],
+  "KoreaU": [
+    "Korea University"
+  ],
+  "Osaka": [
+    "Osaka University"
+  ],
+  "Tohoku": [
+    "Tohoku University"
+  ],
+  "Bristol": [
+    "University of Bristol"
+  ],
+  "Warwick": [
+    "University of Warwick"
+  ],
+  "Southampton": [
+    "University of Southampton"
+  ],
+  "Glasgow": [
+    "University of Glasgow"
+  ],
+  "Copenhagen": [
+    "University of Copenhagen",
+    "UCPH"
+  ],
+  "DTU": [
+    "Technical University of Denmark",
+    "DTU"
+  ],
+  "Aalto": [
+    "Aalto University"
+  ],
+  "Chalmers": [
+    "Chalmers University of Technology"
+  ],
+  "Polimi": [
+    "Politecnico di Milano"
+  ],
+  "Sapienza": [
+    "Sapienza University of Rome"
+  ],
+  "Bologna": [
+    "University of Bologna",
+    "Unibo"
+  ],
+  "KAUST": [
+    "King Abdullah University of Science and Technology",
+    "KAUST"
+  ],
+  "IIT Bombay": [
+    "Indian Institute of Technology Bombay",
+    "IITB"
+  ],
+  "IIT Delhi": [
+    "Indian Institute of Technology Delhi",
+    "IITD"
+  ],
+  "IISc": [
+    "Indian Institute of Science",
+    "IISc Bangalore"
+  ],
+  "NTU Taiwan": [
+    "National Taiwan University",
+    "NTU"
+  ],
+  "Malaya": [
+    "Universiti Malaya",
+    "UM"
+  ],
+  "Adelaide": [
+    "The University of Adelaide"
+  ],
+  "UTS": [
+    "University of Technology Sydney",
+    "UTS"
+  ],
+  "Auckland": [
+    "The University of Auckland"
+  ],
+  "Vrije": [
+    "Vrije Universiteit Amsterdam",
+    "VU Amsterdam"
+  ],
+  "Erasmus": [
+    "Erasmus University Rotterdam"
+  ],
+  "TUB": [
+    "Technical University of Berlin",
+    "TU Berlin"
+  ],
+  "RWTH": [
+    "RWTH Aachen University"
+  ],
+  "KIT": [
+    "Karlsruhe Institute of Technology",
+    "KIT"
+  ],
+  "Trinity Dublin": [
+    "Trinity College Dublin",
+    "The University of Dublin"
+  ],
+  "Moscow State": [
+    "Lomonosov Moscow State University",
+    "MSU"
+  ],
+  "HSE": [
+    "HSE University",
+    "Higher School of Economics"
+  ],
+  "IDEA": [
+    "International Digital Economy Academy",
+    "International Digital Economy Academy, IDEA",
+    "IDEA Research"
+  ],
+  "Shanghai AILab": [
+      "Shanghai Artificial Intelligence Laboratory"
+  ],
+  "BAAI": [
+    "Beijing Academy of Artificial Intelligence"
+  ],
+  "Tel Aviv": [
+    "Tel Aviv University"
+  ],
+  "Meituan": [
+    "Meituan"
+  ],
+  "Kuaishhou": [
+    "Kuaishou Technology", "Keling"
+  ]
+}
