@@ -3881,17 +3881,29 @@ mark {
 .daily-arxiv-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Category tags area: takes remaining space and wraps (responsive to number of interests) */
+.daily-arxiv-categories {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-start;
 }
 
 /* Keep Daily arXiv header button text on one line (avoid vertical stacking of Chinese chars) */
-.daily-arxiv-actions-top .btn,
-.daily-arxiv-actions-top button,
+.daily-arxiv-actions .btn,
 #daily-arxiv-filter,
 #daily-arxiv-settings {
     white-space: nowrap;
     min-width: fit-content;
+    flex-shrink: 0;
 }
 .daily-arxiv-filter-panel .filter-panel-header .filter-clear-btn {
     white-space: nowrap;
@@ -4398,11 +4410,7 @@ mark {
     }
 }
 
-.daily-arxiv-categories {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
+/* .daily-arxiv-categories layout defined above under .daily-arxiv-actions */
 
 .daily-arxiv-category-tag {
     display: inline-flex;

@@ -213,23 +213,21 @@
                 </div>
             </div>
             <div class="daily-arxiv-actions">
-                <div class="daily-arxiv-actions-top">
-                    <!-- Daily arXiv search: title / authors / institution / abstract -->
-                    <div class="daily-arxiv-search-box">
-                        <input id="daily-arxiv-search" type="text"
-                            data-i18n-placeholder="daily_arxiv_search_placeholder" placeholder="Search title / author / institution / abstract..." />
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <button class="btn btn-outline" id="daily-arxiv-filter" data-i18n-title="daily_arxiv_filter_title" title="Filter current papers">
-                        <i class="fas fa-filter"></i> <span data-i18n="daily_arxiv_filter_btn">Filter</span>
-                    </button>
-                    <button class="btn btn-secondary" id="daily-arxiv-settings" data-i18n-title="daily_settings_btn" title="Configure arXiv categories">
-                        <i class="fas fa-cog"></i> <span data-i18n="daily_settings_btn">Settings</span>
-                    </button>
+                <!-- Search: title / authors / institution / abstract -->
+                <div class="daily-arxiv-search-box">
+                    <input id="daily-arxiv-search" type="text"
+                        data-i18n-placeholder="daily_arxiv_search_placeholder" placeholder="Search title / author / institution / abstract..." />
+                    <i class="fas fa-search"></i>
                 </div>
+                <button class="btn btn-outline" id="daily-arxiv-filter" data-i18n-title="daily_arxiv_filter_title" title="Filter current papers">
+                    <i class="fas fa-filter"></i> <span data-i18n="daily_arxiv_filter_btn">Filter</span>
+                </button>
                 <div class="daily-arxiv-categories" id="daily-arxiv-categories">
-                    <!-- Category tags will be rendered here -->
+                    <!-- Category tags (responsive wrap by interest) -->
                 </div>
+                <button class="btn btn-secondary" id="daily-arxiv-settings" data-i18n-title="daily_settings_btn" title="Configure arXiv categories">
+                    <i class="fas fa-cog"></i> <span data-i18n="daily_settings_btn">Settings</span>
+                </button>
             </div>
         </div>
 
