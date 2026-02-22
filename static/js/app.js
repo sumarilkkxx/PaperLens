@@ -871,6 +871,7 @@ async function loadPapers(categoryId, recursive = false) {
 
         currentViewMode = 'category';
         currentCategoryId = categoryId;
+        updateReadingListButtonActiveState();
         saveCurrentViewState();
         showInfoPanel();
         // hide"to-read list"Label
@@ -963,11 +964,7 @@ async function showReadingList(preloadedPapers = null) {
         }
         const btnReading = document.getElementById('btn-show-reading-list');
         if (btnReading) {
-            if (readingListCount > 0) {
-                btnReading.classList.add('has-tasks');
-            } else {
-                btnReading.classList.remove('has-tasks');
-            }
+            btnReading.classList.add('active');
         }
         // If there is no paper, the empty status is displayed.
         if (papers.length === 0) {
@@ -988,6 +985,19 @@ async function showReadingList(preloadedPapers = null) {
     }
 }
 
+// Sync reading list button filled state: only filled when on Paper tab and viewing reading list
+function updateReadingListButtonActiveState() {
+    const btnReading = document.getElementById('btn-show-reading-list');
+    const paperView = document.getElementById('paper-view');
+    if (!btnReading) return;
+    const isOnPaperView = paperView && paperView.style.display !== 'none';
+    if (isOnPaperView && currentViewMode === 'reading-list') {
+        btnReading.classList.add('active');
+    } else {
+        btnReading.classList.remove('active');
+    }
+}
+
 // Update the to-read list count andIDgather
 async function updateReadingListCount() {
     try {
@@ -1002,14 +1012,7 @@ async function updateReadingListCount() {
         if (tiReadingCount) {
             tiReadingCount.textContent = readingListCount;
         }
-        const btnReading = document.getElementById('btn-show-reading-list');
-        if (btnReading) {
-            if (readingListCount > 0) {
-                btnReading.classList.add('has-tasks');
-            } else {
-                btnReading.classList.remove('has-tasks');
-            }
-        }
+        updateReadingListButtonActiveState();
         return papers;
     } catch (e) {
         console.error('Failed to update reading list count:', e);
@@ -4850,10 +4853,13 @@ function switchTab(tabName) {
         paperView.style.display = 'none';
         settingView.style.display = 'none';
         if (dailyArxivView) dailyArxivView.style.display = 'block';
+        updateReadingListButtonActiveState();
         // initialization Daily arXiv page
         showDailyArxivView();
         return; // showDailyArxivView Will save the state by itself
     }
+
+    updateReadingListButtonActiveState();
     saveCurrentViewState();
 }
 

@@ -133,10 +133,11 @@ body {
 .ti-item.ti-reading:hover {
     background: var(--ant-color-border-secondary) !important;
     color: var(--ant-primary-active) !important;
+    border-color: var(--ant-color-border) !important;
 }
 
-.ti-item.ti-reading.active,
-.ti-item.has-tasks.ti-reading {
+/* 阅读列表按钮仅在实际处于阅读列表界面时填充 */
+.ti-item.ti-reading.active {
     background: var(--ant-primary) !important;
     color: #fff !important;
 }
