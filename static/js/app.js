@@ -669,7 +669,7 @@ function createCategoryElement(category, level = 0) {
 
     // Get icon color: custom color > Othersgrey > Default purple
     const isOthers = category.name === 'Others';
-    const folderColor = category.iconColor || (isOthers ? '#8b949e' : '#7d4a9d');
+    const folderColor = category.iconColor || (isOthers ? '#8b949e' : '#171717');
 
     // Pin icon
     const pinIcon = category.pinned ? '<i class="fas fa-thumbtack pin-icon"></i>' : '';
@@ -1124,7 +1124,7 @@ function generatePaperItemHTML(paper, showCheckbox = false) {
     const iconCol = `
         <div class="paper-col-icon">
             ${showCheckbox && isMultiSelectMode ? `<input type="checkbox" ${isSelected ? 'checked' : ''} data-check="1" style="margin-right: 6px;" />` : ''}
-            <i class="fas fa-file-pdf" style="color: #dc3545; font-size: 16px;"></i>
+            <i class="fas fa-file-pdf" style="color: #dc2626; font-size: 16px;"></i>
         </div>
     `;
 
@@ -1155,14 +1155,14 @@ function generatePaperItemHTML(paper, showCheckbox = false) {
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
                     <div style="display: flex; align-items: center; gap: 4px;">
                         <button class="paper-action-log" onclick="showTranslationLogs('${paper.id}', event)" title="View logs"><i class="fas fa-list"></i></button>
-                        <span style="font-size: 11px; color: #007bff; font-weight: 500;">${Math.round(progress)}%</span>
+                        <span style="font-size: 11px; color: #171717; font-weight: 500;">${Math.round(progress)}%</span>
                     </div>
-                    <button onclick="cancelTranslationFromStatus('${paper.id}', event)" title="Cancel translation" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc3545; background: #fff; color: #dc3545; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
+                    <button onclick="cancelTranslationFromStatus('${paper.id}', event)" title="Cancel translation" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc2626; background: #fff; color: #dc2626; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
                         <i class="fas fa-stop" style="font-size: 8px;"></i> Cancel
                     </button>
                 </div>
                 <div class="progress-bar-container translation-progress-bar" style="height: 4px; background: #e9ecef; border-radius: 2px;">
-                    <div class="progress-bar" style="width: ${progress}%; background-color: #007bff; height: 100%; border-radius: 2px; transition: width 0.3s;"></div>
+                    <div class="progress-bar" style="width: ${progress}%; background-color: #171717; height: 100%; border-radius: 2px; transition: width 0.3s;"></div>
                 </div>
             </div>
         </div>`;
@@ -1172,10 +1172,10 @@ function generatePaperItemHTML(paper, showCheckbox = false) {
         translateCol = `<div class="paper-col-action">
             <div style="display: flex; flex-direction: column; width: 100%; gap: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
-                    <span style="font-size: 11px; color: #ffc107; display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 11px; color: #ca8a04; display: flex; align-items: center; gap: 4px;">
                         <i class="fas fa-clock" style="font-size: 10px;"></i> ${queueText}
                     </span>
-                    <button onclick="cancelTranslationFromQueue('${paper.id}', event)" title="Cancel queue" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc3545; background: #fff; color: #dc3545; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
+                    <button onclick="cancelTranslationFromQueue('${paper.id}', event)" title="Cancel queue" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc2626; background: #fff; color: #dc2626; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
                         <i class="fas fa-times" style="font-size: 8px;"></i> Cancel
                     </button>
                 </div>
@@ -1197,14 +1197,14 @@ function generatePaperItemHTML(paper, showCheckbox = false) {
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
                     <div style="display: flex; align-items: center; gap: 4px;">
                          <button class="paper-action-log" onclick="showAnalysisLogs('${paper.id}', event)" title="View logs"><i class="fas fa-list"></i></button>
-                        <span style="font-size: 11px; color: #6f42c1; font-weight: 500;">${Math.round(progress)}%</span>
+                        <span style="font-size: 11px; color: #171717; font-weight: 500;">${Math.round(progress)}%</span>
                     </div>
-                    <button onclick="cancelAnalysis('${paper.id}', event)" title="Cancel interpretation" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc3545; background: #fff; color: #dc3545; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
+                    <button onclick="cancelAnalysis('${paper.id}', event)" title="Cancel interpretation" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc2626; background: #fff; color: #dc2626; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
                         <i class="fas fa-stop" style="font-size: 8px;"></i> Cancel
                     </button>
                 </div>
                 <div class="progress-bar-container" style="height: 4px; background: #e9ecef; border-radius: 2px; width: 100%;">
-                    <div class="progress-bar" style="width: ${progress}%; background-color: #6f42c1; height: 100%; border-radius: 2px; transition: width 0.3s;"></div>
+                    <div class="progress-bar" style="width: ${progress}%; background-color: #171717; height: 100%; border-radius: 2px; transition: width 0.3s;"></div>
                 </div>
             </div>
         </div>`;
@@ -1214,10 +1214,10 @@ function generatePaperItemHTML(paper, showCheckbox = false) {
         analyzeCol = `<div class="paper-col-action">
             <div style="display: flex; flex-direction: column; width: 100%; gap: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
-                    <span style="font-size: 11px; color: #ffc107; display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 11px; color: #ca8a04; display: flex; align-items: center; gap: 4px;">
                         <i class="fas fa-clock" style="font-size: 10px;"></i> ${queueText}
                     </span>
-                    <button onclick="cancelAnalysis('${paper.id}', event)" title="Cancel queue" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc3545; background: #fff; color: #dc3545; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
+                    <button onclick="cancelAnalysis('${paper.id}', event)" title="Cancel queue" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc2626; background: #fff; color: #dc2626; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
                         <i class="fas fa-times" style="font-size: 8px;"></i> Cancel
                     </button>
                 </div>
@@ -2655,12 +2655,12 @@ function showContextMenu(e, categoryId) {
         const pinIcon = document.querySelector('#toggle-pin-category i');
         if (pinIcon) {
             pinIcon.className = category.pinned ? 'fas fa-thumbtack' : 'far fa-thumbtack';
-            pinIcon.style.color = category.pinned ? '#ffc107' : '#666';
+            pinIcon.style.color = category.pinned ? '#ca8a04' : '#666';
         }
     }
 
     // Update selected state in color selection
-    const currentColor = category?.iconColor || '#7d4a9d';
+    const currentColor = category?.iconColor || '#171717';
     document.querySelectorAll('.color-submenu .color-option').forEach(option => {
         option.classList.toggle('selected', option.dataset.color === currentColor);
     });
@@ -2789,7 +2789,7 @@ async function togglePinCategory(categoryId) {
         const pinIcon = document.querySelector('#toggle-pin-category i');
         if (pinIcon) {
             pinIcon.className = newPinned ? 'fas fa-thumbtack' : 'far fa-thumbtack';
-            pinIcon.style.color = newPinned ? '#ffc107' : '#666';
+            pinIcon.style.color = newPinned ? '#ca8a04' : '#666';
         }
     }
 
@@ -2829,7 +2829,7 @@ async function changeCategoryColor(categoryId, color) {
 
     // Save original color（Used for recovery in case of failure）
     const isOthers = category.name === 'Others';
-    const originalColor = category.iconColor || (isOthers ? '#8b949e' : '#7d4a9d');
+    const originalColor = category.iconColor || (isOthers ? '#8b949e' : '#171717');
 
     // Update nowUI（Optimistic update）
     const categoryElement = document.querySelector(`[data-category-id="${categoryId}"]`);
@@ -2957,8 +2957,8 @@ function showMessage(message, type = 'info', duration = 3000) {
     // Set color based on type
     const colors = {
         success: '#28a745',
-        error: '#dc3545',
-        warning: '#ffc107',
+        error: '#dc2626',
+        warning: '#ca8a04',
         info: '#17a2b8'
     };
 
@@ -3003,7 +3003,7 @@ function setupPaperDrag(paperElement, paper) {
         dragImage.style.width = paperElement.offsetWidth + 'px';
         dragImage.style.opacity = '0.7';
         dragImage.style.background = 'white';
-        dragImage.style.border = '2px solid #007bff';
+        dragImage.style.border = '2px solid #171717';
         dragImage.style.borderRadius = '4px';
         dragImage.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
         dragImage.style.padding = '6px 10px';
@@ -3113,7 +3113,7 @@ function setupCategoryDrag(categoryElement, category) {
         dragImage.style.left = '-9999px';
         dragImage.style.padding = '8px 12px';
         dragImage.style.background = '#f8f9fa';
-        dragImage.style.border = '2px solid #7d4a9d';
+        dragImage.style.border = '2px solid #171717';
         dragImage.style.borderRadius = '6px';
         dragImage.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
         dragImage.style.fontSize = '13px';
@@ -3124,9 +3124,9 @@ function setupCategoryDrag(categoryElement, category) {
         dragImage.style.gap = '6px';
 
         if (draggedCategories.length > 0) {
-            dragImage.innerHTML = `<i class="fas fa-folder" style="color: #7d4a9d;"></i> ${draggedCategories.length} directories`;
+            dragImage.innerHTML = `<i class="fas fa-folder" style="color: #171717;"></i> ${draggedCategories.length} directories`;
         } else {
-            dragImage.innerHTML = `<i class="fas fa-folder" style="color: #7d4a9d;"></i> ${category.name}`;
+            dragImage.innerHTML = `<i class="fas fa-folder" style="color: #171717;"></i> ${category.name}`;
         }
 
         document.body.appendChild(dragImage);
@@ -4069,7 +4069,7 @@ function renderCategorySelectTree(root, container) {
 
         const hasChildren = node.children && node.children.length > 0;
         const isOthers = node.name === 'Others';
-        const folderColor = isOthers ? '#8b949e' : '#7d4a9d';
+        const folderColor = isOthers ? '#8b949e' : '#171717';
         item.innerHTML = `
             ${hasChildren ? '<button class="category-toggle"><i class="fas fa-chevron-right"></i></button>' : '<span style="width: 16px; margin-right: 5px;"></span>'}
             <i class="fas fa-folder" style="margin-right: 8px; color: ${folderColor};"></i>
@@ -4291,7 +4291,7 @@ function showCategoryBatchContextMenu(e) {
 
     menu.innerHTML = `
         <div class="context-menu-item" data-action="delete" style="padding: 8px 16px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-trash" style="color: #dc3545;"></i>
+            <i class="fas fa-trash" style="color: #dc2626;"></i>
             <span>Delete selected directory (${selectedCategoryIds.size})</span>
         </div>
     `;
@@ -4402,7 +4402,7 @@ function startInlineRename(element, category) {
     input.style.cssText = `
         font-size: inherit;
         padding: 2px 4px;
-        border: 1px solid #007bff;
+        border: 1px solid #171717;
         border-radius: 3px;
         outline: none;
         width: ${Math.max(nameSpan.offsetWidth + 20, 100)}px;
@@ -4513,7 +4513,7 @@ function startInlineAddCategory(parentId) {
     // Temporary expand button
     tempDiv.innerHTML = `
         <span class="category-toggle-placeholder"></span>
-        <i class="fas fa-folder" style="margin-right: 6px; color: #7d4a9d; font-size: 12px;"></i>
+        <i class="fas fa-folder" style="margin-right: 6px; color: #171717; font-size: 12px;"></i>
         <span class="category-name" style="display: none;"></span>
         <span class="pdf-count">0</span>
     `;
@@ -5211,7 +5211,7 @@ async function testLLMAPIByScenario(scenarioKey) {
 
     if (!llmModel || !llmBaseUrl || !llmApiKey) {
         resultDiv.innerHTML = `
-            <div style="padding: 12px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; color: #856404;">
+            <div style="padding: 12px; background: #fff3cd; border: 1px solid #ca8a04; border-radius: 6px; color: #856404;">
                 <i class="fas fa-exclamation-triangle"></i> Please fill in the complete LLM API Configuration
             </div>
         `;
@@ -5240,7 +5240,7 @@ async function testLLMAPIByScenario(scenarioKey) {
         `;
     } else {
         resultDiv.innerHTML = `
-            <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc3545; border-radius: 6px; color: #721c24;">
+            <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc2626; border-radius: 6px; color: #721c24;">
                 <i class="fas fa-times-circle"></i> <strong>test failed</strong>
                 <div style="margin-top: 8px; font-size: 13px;">${data.error || 'unknown error'}</div>
             </div>
@@ -5279,7 +5279,7 @@ async function testMineruAPI(event) {
 
         if (!mineruServerUrl) {
             resultDiv.innerHTML = `
-                <div style="padding: 12px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; color: #856404;">
+                <div style="padding: 12px; background: #fff3cd; border: 1px solid #ca8a04; border-radius: 6px; color: #856404;">
                     <i class="fas fa-exclamation-triangle"></i> Please fill in first MinerU Server URL
                 </div>
             `;
@@ -5315,7 +5315,7 @@ async function testMineruAPI(event) {
                 `;
             } else {
                 resultDiv.innerHTML = `
-                    <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc3545; border-radius: 6px; color: #721c24;">
+                    <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc2626; border-radius: 6px; color: #721c24;">
                         <i class="fas fa-times-circle"></i> <strong>test failed</strong>
                         <div style="margin-top: 8px; font-size: 13px;">${data.error || 'unknown error'}</div>
                     </div>
@@ -5323,7 +5323,7 @@ async function testMineruAPI(event) {
             }
         } catch (error) {
             resultDiv.innerHTML = `
-                <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc3545; border-radius: 6px; color: #721c24;">
+                <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc2626; border-radius: 6px; color: #721c24;">
                     <i class="fas fa-times-circle"></i> <strong>test failed</strong>
                     <div style="margin-top: 8px; font-size: 13px;">${error.message}</div>
                 </div>
@@ -5335,7 +5335,7 @@ async function testMineruAPI(event) {
 
         if (!mineruApiToken) {
             resultDiv.innerHTML = `
-                <div style="padding: 12px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; color: #856404;">
+                <div style="padding: 12px; background: #fff3cd; border: 1px solid #ca8a04; border-radius: 6px; color: #856404;">
                     <i class="fas fa-exclamation-triangle"></i> Please enter API token
                 </div>
             `;
@@ -5371,7 +5371,7 @@ async function testMineruAPI(event) {
                 `;
             } else {
                 resultDiv.innerHTML = `
-                    <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc3545; border-radius: 6px; color: #721c24;">
+                    <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc2626; border-radius: 6px; color: #721c24;">
                         <i class="fas fa-times-circle"></i> <strong>test failed</strong>
                         <div style="margin-top: 8px; font-size: 13px;">${data.error || 'unknown error'}</div>
                     </div>
@@ -5379,7 +5379,7 @@ async function testMineruAPI(event) {
             }
         } catch (error) {
             resultDiv.innerHTML = `
-                <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc3545; border-radius: 6px; color: #721c24;">
+                <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc2626; border-radius: 6px; color: #721c24;">
                     <i class="fas fa-times-circle"></i> <strong>test failed</strong>
                     <div style="margin-top: 8px; font-size: 13px;">${error.message}</div>
                 </div>
@@ -5968,7 +5968,7 @@ function setHeatmapColorScheme(scheme, save = true) {
 // Load saved color system
 async function loadHeatmapColorScheme() {
     const userSettings = await getUserSettings();
-    const scheme = userSettings.heatmapColorScheme || 'green';
+    const scheme = userSettings.heatmapColorScheme || 'blue';
     setHeatmapColorScheme(scheme, false); // Do not save repeatedly
 }
 
@@ -8520,14 +8520,14 @@ function updatePaperStatusDisplay(paperId) {
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
                     <div style="display: flex; align-items: center; gap: 4px;">
                         <button class="paper-action-log" onclick="showTranslationLogs('${paperId}', event)" title="View logs"><i class="fas fa-list"></i></button>
-                        <span style="font-size: 11px; color: #007bff; font-weight: 500;">${Math.round(progress)}%</span>
+                        <span style="font-size: 11px; color: #171717; font-weight: 500;">${Math.round(progress)}%</span>
                     </div>
-                    <button onclick="cancelTranslationFromStatus('${paperId}', event)" title="Cancel translation" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc3545; background: #fff; color: #dc3545; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
+                    <button onclick="cancelTranslationFromStatus('${paperId}', event)" title="Cancel translation" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc2626; background: #fff; color: #dc2626; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
                         <i class="fas fa-stop" style="font-size: 8px;"></i> Cancel
                     </button>
                 </div>
                 <div class="progress-bar-container translation-progress-bar" style="height: 4px; background: #e9ecef; border-radius: 2px;">
-                    <div class="progress-bar" style="width: ${progress}%; background-color: #007bff; height: 100%; border-radius: 2px; transition: width 0.3s;"></div>
+                    <div class="progress-bar" style="width: ${progress}%; background-color: #171717; height: 100%; border-radius: 2px; transition: width 0.3s;"></div>
                 </div>
             </div>`;
         } else if (tStatus && tStatus.status === 'queued') {
@@ -8536,10 +8536,10 @@ function updatePaperStatusDisplay(paperId) {
             translateColHtml = `
             <div style="display: flex; flex-direction: column; width: 100%; gap: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
-                    <span style="font-size: 11px; color: #ffc107; display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 11px; color: #ca8a04; display: flex; align-items: center; gap: 4px;">
                         <i class="fas fa-clock" style="font-size: 10px;"></i> ${queueText}
                     </span>
-                    <button onclick="cancelTranslationFromQueue('${paperId}', event)" title="Cancel queue" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc3545; background: #fff; color: #dc3545; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
+                    <button onclick="cancelTranslationFromQueue('${paperId}', event)" title="Cancel queue" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc2626; background: #fff; color: #dc2626; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
                         <i class="fas fa-times" style="font-size: 8px;"></i> Cancel
                     </button>
                 </div>
@@ -8566,14 +8566,14 @@ function updatePaperStatusDisplay(paperId) {
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
                     <div style="display: flex; align-items: center; gap: 4px;">
                          <button class="paper-action-log" onclick="showAnalysisLogs('${paperId}', event)" title="View logs"><i class="fas fa-list"></i></button>
-                        <span style="font-size: 11px; color: #6f42c1; font-weight: 500;">${Math.round(progress)}%</span>
+                        <span style="font-size: 11px; color: #171717; font-weight: 500;">${Math.round(progress)}%</span>
                     </div>
-                    <button onclick="cancelAnalysis('${paperId}', event)" title="Cancel interpretation" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc3545; background: #fff; color: #dc3545; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
+                    <button onclick="cancelAnalysis('${paperId}', event)" title="Cancel interpretation" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc2626; background: #fff; color: #dc2626; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
                         <i class="fas fa-stop" style="font-size: 8px;"></i> Cancel
                     </button>
                 </div>
                 <div class="progress-bar-container" style="height: 4px; background: #e9ecef; border-radius: 2px; width: 100%;">
-                    <div class="progress-bar" style="width: ${progress}%; background-color: #6f42c1; height: 100%; border-radius: 2px; transition: width 0.3s;"></div>
+                    <div class="progress-bar" style="width: ${progress}%; background-color: #171717; height: 100%; border-radius: 2px; transition: width 0.3s;"></div>
                 </div>
             </div>`;
         } else if (aStatus && aStatus.status === 'queued') {
@@ -8582,10 +8582,10 @@ function updatePaperStatusDisplay(paperId) {
             analyzeColHtml = `
             <div style="display: flex; flex-direction: column; width: 100%; gap: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
-                    <span style="font-size: 11px; color: #ffc107; display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 11px; color: #ca8a04; display: flex; align-items: center; gap: 4px;">
                         <i class="fas fa-clock" style="font-size: 10px;"></i> ${queueText}
                     </span>
-                    <button onclick="cancelAnalysis('${paperId}', event)" title="Cancel queue" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc3545; background: #fff; color: #dc3545; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
+                    <button onclick="cancelAnalysis('${paperId}', event)" title="Cancel queue" style="font-size: 10px; padding: 2px 6px; border: 1px solid #dc2626; background: #fff; color: #dc2626; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; line-height: 1;">
                         <i class="fas fa-times" style="font-size: 8px;"></i> Cancel
                     </button>
                 </div>
@@ -8653,7 +8653,7 @@ function updatePaperStatusDisplay(paperId) {
                 if (btnContainer) {
                     const btnHtml = `
                         <div class="chinese-version-btn-container" style="margin-top: 5px;">
-                            <button class="chinese-version-btn" onclick="viewAnalysisResult('${paperId}', event)" title="Check AI Interpretation" style="background: #6f42c1; color: white; border-color: #6f42c1;">
+                            <button class="chinese-version-btn" onclick="viewAnalysisResult('${paperId}', event)" title="Check AI Interpretation" style="background: #171717; color: white; border-color: #171717;">
                                 <i class="fas fa-brain"></i> Check AI Interpretation
                             </button>
                         </div>

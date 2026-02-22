@@ -9,7 +9,9 @@
     <link rel="alternate icon" type="image/png" href="{{ url_for('static', filename='images/website_logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.1">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}?v=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-purple.css') }}?v=1.0">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-purple.css') }}?v=1.0"> -->
+    <!-- Ant Design + shadcn 风格主题（统一 UI，不改变布局与逻辑） -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-antd-shadcn.css') }}?v=1.0">
     <!-- PDF.js (CDN) for client-side PDF metadata parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
@@ -381,7 +383,7 @@
                         <span data-i18n="settings_interface_language">Interface Language</span>
                     </div>
                     <div class="setting-card-body">
-                        <p style="color: #666; margin-bottom: 12px; font-size: 14px;">
+                        <p class="text-muted" style="margin-bottom: 12px; font-size: 14px;">
                             <i class="fas fa-info-circle"></i>
                             <span data-i18n="settings_interface_language_hint">Choose the language for the entire UI.</span>
                         </p>
@@ -438,7 +440,7 @@
                 </div>
 
                 <!-- Heatmap -->
-                <div class="heatmap-container">
+                <div class="heatmap-container" data-scheme="blue">
                     <div class="heatmap-header">
                         <span class="heatmap-contributions" id="heatmap-total">0 days with reading activity</span>
                         <div class="heatmap-year-selector">
@@ -470,13 +472,13 @@
                         <span class="heatmap-legend-label" data-i18n="overview_heatmap_more">More</span>
                         <!-- Color scheme dropdown -->
                         <div class="color-scheme-dropdown" id="color-scheme-dropdown">
-                            <div class="color-scheme-option" data-scheme="green">
-                                <span class="scheme-preview green"></span>
-                                <span data-i18n="overview_heatmap_github_green">GitHub Green</span>
-                            </div>
                             <div class="color-scheme-option" data-scheme="blue">
                                 <span class="scheme-preview blue"></span>
                                 <span data-i18n="overview_heatmap_ocean_blue">Ocean Blue</span>
+                            </div>
+                            <div class="color-scheme-option" data-scheme="green">
+                                <span class="scheme-preview green"></span>
+                                <span data-i18n="overview_heatmap_github_green">GitHub Green</span>
                             </div>
                             <div class="color-scheme-option" data-scheme="purple">
                                 <span class="scheme-preview purple"></span>
@@ -517,7 +519,7 @@
                         <span data-i18n="agentic_llm_config">LLM API Configuration</span>
                     </div>
                     <div class="setting-card-body">
-                        <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
+                        <p class="text-muted" style="margin-bottom: 20px; font-size: 14px;">
                             <i class="fas fa-info-circle"></i>
                             <span data-i18n="agentic_llm_hint">Configure different OpenAI-compatible inference services for different AI feature scenarios.</span>
                         </p>
@@ -636,7 +638,7 @@
                         <span data-i18n="agentic_output_language">AI Output Language</span>
                     </div>
                     <div class="setting-card-body">
-                        <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
+                        <p class="text-muted" style="margin-bottom: 20px; font-size: 14px;">
                             <i class="fas fa-info-circle"></i>
                             <span data-i18n="agentic_output_language_hint">Select the output language for AI features. This setting applies to AI translation, AI interpretation, and Daily arXiv summary.</span>
                         </p>
@@ -660,7 +662,7 @@
                         <span data-i18n="pdf_parsing_service">PDF Parsing Service</span>
                     </div>
                     <div class="setting-card-body">
-                        <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
+                        <p class="text-muted" style="margin-bottom: 20px; font-size: 14px;">
                             <i class="fas fa-info-circle"></i>
                             <span data-i18n="pdf_parsing_hint">Used by AI analysis to convert PDF to Markdown format.</span>
                         </p>
