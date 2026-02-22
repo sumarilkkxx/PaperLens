@@ -888,13 +888,15 @@ async function loadPapers(categoryId, recursive = false) {
                 categoryItem.classList.add('selected');
             }
         }
-        // Use local occupancy to avoid flickering caused by global masking
-        papersList.innerHTML = `
-            <div class="empty-state" style="opacity:.7">
-                <i class="fas fa-file-pdf"></i>
-                <p>loading...</p>
-            </div>
-        `;
+        const hadContent = papersList && papersList.children.length > 0;
+        if (!hadContent) {
+            papersList.innerHTML = `
+                <div class="empty-state" style="opacity:.7">
+                    <i class="fas fa-file-pdf"></i>
+                    <p>loading...</p>
+                </div>
+            `;
+        }
 
         // according to recursive Parameter decision API path
         const apiUrl = recursive
@@ -938,13 +940,15 @@ async function showReadingList(preloadedPapers = null) {
         if (readingListLabel) {
             readingListLabel.style.display = 'inline-block';
         }
-        // Get the to-read list from the backend
-        papersList.innerHTML = `
-            <div class="empty-state" style="opacity:.7">
-                <i class="fas fa-file-pdf"></i>
-                <p>loading...</p>
-            </div>
-        `;
+        const hadContent = papersList && papersList.children.length > 0;
+        if (!hadContent) {
+            papersList.innerHTML = `
+                <div class="empty-state" style="opacity:.7">
+                    <i class="fas fa-file-pdf"></i>
+                    <p>loading...</p>
+                </div>
+            `;
+        }
 
         if (preloadedPapers) {
             papers = preloadedPapers;

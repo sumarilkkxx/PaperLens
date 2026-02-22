@@ -751,14 +751,6 @@
         if (typeof window.__LOCALE !== 'undefined') {
             window.__LOCALE = locale;
         }
-        var logo = document.getElementById('navbar-logo');
-        if (logo && logo.src) {
-            if (locale === 'zh_CN') {
-                logo.src = logo.src.replace(/hompage_logo\.svg/, 'hompage_logo_zh.svg');
-            } else {
-                logo.src = logo.src.replace(/hompage_logo_zh\.svg/, 'hompage_logo.svg');
-            }
-        }
         var titleKey = 'page_title';
         if (TRANSLATIONS[locale] && TRANSLATIONS[locale][titleKey]) {
             document.title = TRANSLATIONS[locale][titleKey];

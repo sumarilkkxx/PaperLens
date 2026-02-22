@@ -113,6 +113,7 @@ function ensureAppLoaded() {
     patchFetchWithAuth();
 
     appLoading = true;
+    showAppLoading(true);
     const script = document.createElement('script');
     script.id = 'paperlens-app-script';
     script.src = '/static/js/app.js?v=1.2';
@@ -122,6 +123,7 @@ function ensureAppLoaded() {
     };
     script.onerror = () => {
         appLoading = false;
+        showAppLoading(false);
     };
     document.body.appendChild(script);
 }
@@ -136,6 +138,7 @@ function loadAppWithoutAuth() {
     }
 
     appLoading = true;
+    showAppLoading(true);
     const script = document.createElement('script');
     script.id = 'paperlens-app-script';
     script.src = '/static/js/app.js?v=1.2';
@@ -145,8 +148,14 @@ function loadAppWithoutAuth() {
     };
     script.onerror = () => {
         appLoading = false;
+        showAppLoading(false);
     };
     document.body.appendChild(script);
+}
+
+function showAppLoading(show) {
+    const el = document.getElementById('loading');
+    if (el) el.style.display = show ? 'flex' : 'none';
 }
 
 function patchFetchWithAuth() {
