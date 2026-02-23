@@ -95,7 +95,7 @@ Efficient reading list management and flexible system configuration.
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/flyflypeng/PaperLens
+   git clone https://github.com/sumarilkkxx/PaperLens
    cd PaperLens
    ```
 
