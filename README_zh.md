@@ -91,7 +91,7 @@
 
 1. **克隆仓库**
    ```bash
-   git clone https://github.com/flyflypeng/PaperLens
+   git clone https://github.com/sumarilkkxx/PaperLens
    cd PaperLens
    ```
 
