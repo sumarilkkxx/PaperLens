@@ -13744,7 +13744,6 @@ onAppReady(() => {
 async function showOnboardingModal() {
     const modal = document.getElementById('onboarding-modal');
     if (modal) {
-        // Load current AI language setting and set it in the onboarding modal
         try {
             const userSettings = await getUserSettings();
             const aiLanguage = userSettings.aiLanguage || 'zh';
@@ -13752,8 +13751,30 @@ async function showOnboardingModal() {
             if (onboardingLanguageEl) {
                 onboardingLanguageEl.value = aiLanguage;
             }
+            const locale = userSettings.locale || 'en';
+            const interfaceLocaleEl = document.getElementById('onboarding-interface-locale');
+            if (interfaceLocaleEl) {
+                interfaceLocaleEl.value = locale;
+                if (!interfaceLocaleEl.dataset.onboardingLocaleBound) {
+                    interfaceLocaleEl.dataset.onboardingLocaleBound = '1';
+                    interfaceLocaleEl.addEventListener('change', async function () {
+                        const newLocale = interfaceLocaleEl.value || 'en';
+                        try {
+                            await saveUserSettings({ locale: newLocale });
+                            window.__LOCALE = newLocale;
+                            if (typeof window.applyTranslations === 'function') {
+                                window.applyTranslations(newLocale);
+                            }
+                            const settingLocaleEl = document.getElementById('setting-locale');
+                            if (settingLocaleEl) settingLocaleEl.value = newLocale;
+                        } catch (e) {
+                            console.error('[Onboarding] Failed to save interface language:', e);
+                        }
+                    });
+                }
+            }
         } catch (e) {
-            console.error('[Onboarding] Failed to load AI language setting:', e);
+            console.error('[Onboarding] Failed to load settings:', e);
         }
 
         modal.style.display = 'flex';

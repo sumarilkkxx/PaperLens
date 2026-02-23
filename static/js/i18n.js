@@ -502,6 +502,8 @@
 
             // Onboarding
             onboarding_welcome: 'Welcome to PaperLens',
+            onboarding_interface_language: 'Interface Language',
+            onboarding_interface_language_hint: 'Choose the language for the entire UI. Switch takes effect immediately.',
             onboarding_ai_language: 'Select AI Output Language',
             onboarding_ai_language_hint: 'Choose the language for AI-generated content (translation, interpretation, and Daily arXiv summaries):',
             onboarding_step1: '1. Configure AI features',
@@ -1018,6 +1020,8 @@
             tt_no_tasks: '暂无进行中的任务',
 
             onboarding_welcome: '欢迎使用 PaperLens',
+            onboarding_interface_language: '界面语言',
+            onboarding_interface_language_hint: '选择整个界面的显示语言，切换后立即生效。',
             onboarding_ai_language: '选择 AI 输出语言',
             onboarding_ai_language_hint: '选择 AI 生成内容的语言（翻译、解读与每日 arXiv 摘要）：',
             onboarding_step1: '1. 配置 AI 功能',

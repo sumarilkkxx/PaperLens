@@ -1463,7 +1463,23 @@
                 </button>
             </div>
             <div class="onboarding-body">
-                <!-- Language Selection (at the top) -->
+                <!-- Interface Language (at the top) -->
+                <div class="onboarding-step"
+                    style="border-bottom: 2px solid #e0e0e0; padding-bottom: 20px; margin-bottom: 20px;">
+                    <div class="onboarding-step-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="onboarding-step-content">
+                        <h3 data-i18n="onboarding_interface_language">Interface Language</h3>
+                        <p style="margin-bottom: 12px;" data-i18n="onboarding_interface_language_hint">Choose the language for the entire UI. Switch takes effect immediately.</p>
+                        <select id="onboarding-interface-locale" class="setting-input"
+                            style="width: 200px; font-size: 14px; padding: 8px;">
+                            <option value="zh_CN" data-i18n="settings_lang_simplified_chinese">简体中文</option>
+                            <option value="en" data-i18n="settings_lang_english">English</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- AI Output Language -->
                 <div class="onboarding-step"
                     style="border-bottom: 2px solid #e0e0e0; padding-bottom: 20px; margin-bottom: 20px;">
                     <div class="onboarding-step-icon">
@@ -1540,8 +1556,8 @@
                     <input type="checkbox" id="onboarding-dont-show">
                     <span data-i18n="onboarding_dont_show">Don't show again</span>
                 </label>
-                <button class="btn btn-primary" onclick="closeOnboardingModal()" data-i18n="onboarding_get_started">
-                    Get started
+                <button class="btn btn-primary onboarding-get-started-btn" onclick="closeOnboardingModal()">
+                    <span data-i18n="onboarding_get_started">Get started</span>
                 </button>
             </div>
         </div>
