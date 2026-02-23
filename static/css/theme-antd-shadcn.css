@@ -828,6 +828,39 @@ select.setting-input {
     color: var(--ant-primary) !important;
 }
 
+/* ========== 每日 arXiv 开关 - Shadcn Switch 风格 ========== */
+.switch {
+    --switch-track-off: var(--ant-color-border);
+    --switch-track-on: var(--ant-primary);
+    --switch-thumb: var(--background, #fff);
+    --switch-ring: rgba(0, 0, 0, 0.08);
+}
+
+.slider {
+    background-color: var(--switch-track-off) !important;
+    border-radius: 9999px;
+    transition: var(--ant-transition);
+}
+
+.slider:before {
+    background-color: var(--switch-thumb) !important;
+    border-radius: 50%;
+    box-shadow: var(--ant-shadow-sm);
+    transition: var(--ant-transition);
+}
+
+input:checked + .slider {
+    background-color: var(--switch-track-on) !important;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 0 2px var(--switch-ring) !important;
+}
+
+input:focus-visible + .slider {
+    box-shadow: 0 0 0 2px var(--ant-primary) !important;
+}
+
 /* ========== 导入/导出 - shadcn 风格统一 ========== */
 /* 导入类型 Tab（与 setting-nav-item / nav-tab 一致） */
 .import-type-tabs {
