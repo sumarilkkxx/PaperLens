@@ -400,8 +400,12 @@ def register_paper_operation_routes(
         if not file_path:
             filename = paper.filename
             if filename and category_path:
+                # Prevent path traversal: use basename only
+                safe_name = os.path.basename(filename)
+                if safe_name != filename or ".." in safe_name:
+                    return jsonify({"error": "Invalid filename in paper data"}), 400
                 category_folder = create_category_folder(category_path[1:])
-                file_path = os.path.join(category_folder, filename)
+                file_path = os.path.join(category_folder, safe_name)
                 print(f"Try to rebuild the path: {file_path}")
 
         if not file_path:

@@ -171,10 +171,22 @@ def register_settings_routes(
             # Read existing history
             current = SettingsDAO.get_setting('reading_history', {})
 
-            # Update history (merged)
-            for date, minutes in data.items():
+            # Update history (merged); coerce minutes to number to avoid type errors
+            for date, raw_minutes in data.items():
+                try:
+                    minutes = int(float(raw_minutes))
+                except (TypeError, ValueError):
+                    minutes = 0
                 if date in current:
-                    current[date] = current[date] + minutes
+                    existing = current[date]
+                    if isinstance(existing, dict):
+                        prev = existing.get("total", 0)
+                        if not isinstance(prev, (int, float)):
+                            prev = 0
+                        current[date] = {"total": prev + minutes, "papers": existing.get("papers", [])}
+                    else:
+                        prev = existing if isinstance(existing, (int, float)) else 0
+                        current[date] = prev + minutes
                 else:
                     current[date] = minutes
 
@@ -188,7 +200,11 @@ def register_settings_routes(
         """Record today’s reading time (compatible with new and old formats)"""
         try:
             data = request.json or {}
-            minutes = data.get("minutes", 0)
+            raw_minutes = data.get("minutes", 0)
+            try:
+                minutes = int(float(raw_minutes))
+            except (TypeError, ValueError):
+                minutes = 0
             date = data.get("date")  # YYYY-MM-DD
             paper_id = data.get("paper_id")  # optional, essayID
 

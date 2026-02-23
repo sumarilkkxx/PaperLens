@@ -1,7 +1,11 @@
 import unittest
 
+import pytest
 
-from paperlens.tools.basic_tools.daily_arxiv import match_any_keyword_in_title_or_abstract
+try:
+    from paperlens.tools.basic_tools.daily_arxiv import match_any_keyword_in_title_or_abstract
+except ImportError:
+    pytest.skip("arxiv package not installed", allow_module_level=True)
 
 
 class TestDailyArxivKeywordFilter(unittest.TestCase):
