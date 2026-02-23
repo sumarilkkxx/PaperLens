@@ -440,6 +440,7 @@ analysis_tasks_lock = threading.Lock()  # Protect interpretation task dictionary
 
 @app.route("/")
 def index():
+    """Serve the main page (Jinja template + static JS/CSS)."""
     try:
         user_settings = SettingsDAO.get_setting("user_settings", {}) or {}
     except Exception:

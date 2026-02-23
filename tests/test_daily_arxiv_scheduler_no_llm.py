@@ -4,8 +4,12 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+import pytest
 
-from paperlens.tools.basic_tools.daily_arxiv import DailyArxivManager
+try:
+    from paperlens.tools.basic_tools.daily_arxiv import DailyArxivManager
+except ImportError:
+    pytest.skip("arxiv package not installed", allow_module_level=True)
 
 
 class TestDailyArxivSchedulerNoLLM(unittest.TestCase):

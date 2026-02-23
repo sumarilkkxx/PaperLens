@@ -7,7 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/website_logo.svg') }}">
     <link rel="alternate icon" type="image/png" href="{{ url_for('static', filename='images/website_logo.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-purple.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-antd-shadcn.css') }}?v=1.0">
     <style>
         body {
             margin: 0;
@@ -95,40 +95,149 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .pdf-viewer-with-annotations {
+            display: flex;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+        .pdf-main {
+            flex: 1;
+            overflow: auto;
+            background: #525252;
+        }
+        #pdf-canvas-container {
+            padding: 20px;
+            min-height: 100%;
+        }
+        .pdf-pages-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .pdf-page-wrap {
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            background: #fff;
+        }
+        .pdf-page-wrap .canvas-wrap {
+            position: relative;
+        }
+        .pdf-page-wrap .text-layer {
+            position: absolute;
+            left: 0;
+            top: 0;
+            overflow: hidden;
+            pointer-events: auto;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .pdf-page-wrap .highlight-layer {
+            position: absolute;
+            left: 0;
+            top: 0;
+            pointer-events: none;
+        }
+        .pdf-annotations-sidebar {
+            width: 260px;
+            min-width: 260px;
+            background: #1a1a1a;
+            border-left: 1px solid #444;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        .pdf-annotations-sidebar h4 {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            color: #aaa;
+        }
+        .pdf-annotations-list .sidebar-item {
+            padding: 8px 10px;
+            margin-bottom: 4px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #ddd;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .pdf-annotations-list .sidebar-item:hover {
+            background: #333;
+        }
+        .pdf-annotations-list .sidebar-item i {
+            margin-right: 6px;
+            color: #007bff;
+        }
+        .pdf-selection-toolbar {
+            position: fixed;
+            z-index: 10000;
+            display: flex;
+            gap: 4px;
+            padding: 6px 8px;
+            background: #333;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .pdf-selection-toolbar button {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            background: #444;
+            color: #fff;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .pdf-selection-toolbar button:hover {
+            background: #007bff;
+        }
+        .pdf-toolbar-extra {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .pdf-page-nav {
+            font-size: 13px;
+            color: #ccc;
+        }
     </style>
 </head>
 <body data-use-chinese="{{ 'true' if use_chinese else 'false' }}">
     <script>
         window.__SUPABASE_URL = {{ supabase_url | tojson }};
         window.__SUPABASE_ANON_KEY = {{ supabase_anon_key | tojson }};
+        window.__PAPER_ID__ = {{ paper_id | tojson }};
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2';"></script>
     <script src="{{ url_for('static', filename='js/api_auth_patch.js') }}?v=1"></script>
     <div class="header">
         <div>
             <button id="back-btn" class="btn btn-secondary" title="Close current tab (Ctrl+W)">
-                <i class="fas fa-times"></i> Close
+                <i class="fas fa-times"></i> <span id="header-close">Close</span>
             </button>
         </div>
         <h3 id="pdf-title">{{ paper_title or 'PDF Viewer' }}</h3>
-        <div>
-            <a href="/api/paper/{{ paper_id }}/file" class="btn btn-secondary" download>
-                <i class="fas fa-download"></i> Download
+        <div class="pdf-toolbar-extra">
+            <a href="/api/paper/{{ paper_id }}/file" id="pdf-download-link" class="btn btn-secondary" download>
+                <i class="fas fa-download"></i> <span id="header-download">Download</span>
             </a>
         </div>
     </div>
     
-    <div class="pdf-container">
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Loading PDF viewer...</p>
+    <div class="pdf-viewer-with-annotations">
+        <div class="pdf-main">
+            <div class="pdf-container" style="height: 100%; position: relative;">
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Loading PDF...</p>
+                </div>
+                <iframe id="pdf-iframe" style="display: none; width: 100%; height: 100%; border: none;" title="PDF"></iframe>
+            </div>
         </div>
-        <iframe 
-            id="pdf-iframe" 
-            style="display: none;"
-            src=""
-            title="PDF Viewer">
-        </iframe>
     </div>
     
     <script>
@@ -150,75 +259,21 @@
             }
         }
         
-        // initialization PDF Viewer
+        // initialization PDF Viewer (iframe)
         function initPDFViewer() {
-            const iframe = document.getElementById('pdf-iframe');
             const loading = document.getElementById('loading');
-            
-            // Check whether to use Chinese version (from data attribute)
+            const iframe = document.getElementById('pdf-iframe');
             const useChinese = (document.body.getAttribute('data-use-chinese') === 'true');
             let pdfUrl = window.location.origin + '/api/paper/{{ paper_id }}/file';
-            
             if (useChinese) {
                 pdfUrl = window.location.origin + '/api/paper/{{ paper_id }}/chinese/file';
             }
-            
-            console.log('PDF URL:', pdfUrl);
-            console.log('Use Chinese version:', useChinese);
-            
-            // Use fetch to check if file exists
-            fetch(pdfUrl, { method: 'HEAD' })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    console.log('PDF file check succeeded');
-                    
-                    // Load the raw PDF in iframe to avoid cross-origin issues
-                    iframe.src = pdfUrl;
-                    
-                    // Listen for iframe load
-                    iframe.onload = function() {
-                        console.log('PDF iframe loaded');
-                        loading.style.display = 'none';
-                        iframe.style.display = 'block';
-                    };
-                    
-                    // Timeout: if not loaded in 10s, show error
-                    setTimeout(() => {
-                        if (loading.style.display !== 'none') {
-                            console.error('PDF load timeout');
-                            loading.innerHTML = `
-                                <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 15px;"></i>
-                                <p style="color: #dc3545;">PDF load timeout</p>
-                                <p style="color: #999; font-size: 12px; margin-top: 10px;">Please check if the PDF file exists, or try downloading directly.</p>
-                                <button class="btn" onclick="location.reload()" style="margin-top: 15px;">Reload</button>
-                                <a href="${pdfUrl}" class="btn btn-secondary" download style="margin-top: 10px; margin-left: 10px;">Download PDF</a>
-                            `;
-                        }
-                    }, 10000);
-                })
-                .catch(error => {
-                    console.error('PDF file check failed:', error);
-                    loading.innerHTML = `
-                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 15px;"></i>
-                        <p style="color: #dc3545;">PDF load failed</p>
-                        <p style="color: #999; font-size: 12px; margin-top: 10px;">Error: ${error.message}</p>
-                        <button class="btn" onclick="location.reload()" style="margin-top: 15px;">Reload</button>
-                        <a href="${pdfUrl}" class="btn btn-secondary" download style="margin-top: 10px; margin-left: 10px;">Download PDF</a>
-                    `;
-                });
-            
-            // Fallback error handler
-            iframe.onerror = function() {
-                console.error('PDF iframe load error');
-                loading.innerHTML = `
-                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 15px;"></i>
-                    <p style="color: #dc3545;">PDF load failed</p>
-                    <button class="btn" onclick="location.reload()">Reload</button>
-                    <a href="${pdfUrl}" class="btn btn-secondary" download style="margin-top: 10px; margin-left: 10px;">Download PDF</a>
-                `;
-            };
+            const downloadLink = document.getElementById('pdf-download-link');
+            if (downloadLink) downloadLink.href = pdfUrl;
+
+            iframe.onload = function() { loading.style.display = 'none'; };
+            iframe.style.display = 'block';
+            iframe.src = pdfUrl;
         }
         
         // Close window helper
@@ -317,14 +372,6 @@
             
             activityEvents.forEach(eventType => {
                 document.addEventListener(eventType, recordUserActivity, { passive: true });
-                const iframe = document.getElementById('pdf-iframe');
-                if (iframe) {
-                    try {
-                        iframe.contentWindow?.document?.addEventListener(eventType, recordUserActivity, { passive: true });
-                    } catch (e) {
-                        // Cross-origin, ignore
-                    }
-                }
             });
             
             lastActivityTime = Date.now();

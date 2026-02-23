@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import glob
 import os
 import re
+import shutil
 import subprocess
+import sys
+import tempfile
 import threading
 from dataclasses import dataclass
 from datetime import datetime
@@ -136,91 +140,128 @@ def translate_paper_task(
             pipe.close()
 
     original_cwd = os.getcwd()
-    try:
-        os.chdir(pdf_dir)
-        base_name = os.path.splitext(pdf_filename)[0]
-        sanitized_pdf_filename: str | None = None
-        attempt_pdf_filename = pdf_filename
-        attempt_base_name = base_name
-        return_code = 1
-        enable_compatibility = False
+    base_name = os.path.splitext(pdf_filename)[0]
+    sanitized_pdf_filename: str | None = None
+    attempt_pdf_filename = pdf_filename
+    attempt_base_name = base_name
+    return_code = 1
+    enable_compatibility = False
 
+    try:
         for attempt_index in range(2):
             with deps.translation_tasks_lock:
                 deps.translation_tasks[task_id]["progress"] = int(
                     deps.translation_tasks[task_id].get("progress") or 0
                 )
 
-            cmd = [
-                "babeldoc",
+            attempt_pdf_path = os.path.join(pdf_dir, attempt_pdf_filename)
+            attempt_pdf_abs = os.path.abspath(attempt_pdf_path)
+
+            # Invoke BabelDOC via a temporary script so argv is correct on all platforms (Windows
+            # can mis-parse args when using python -c "..." with many arguments).
+            # Entry point from BabelDOC pyproject: babeldoc = "babeldoc.main:cli"
+            _babeldoc_args = [
                 "--openai",
-                "--openai-model",
-                openai_model,
-                "--openai-base-url",
-                openai_base_url,
-                "--openai-api-key",
-                openai_api_key,
+                "--openai-model=" + openai_model,
+                "--openai-base-url=" + openai_base_url,
+                "--openai-api-key=" + openai_api_key,
             ]
             if enable_compatibility:
-                cmd.append("--enhance-compatibility")
-            cmd.extend(["--files", attempt_pdf_filename])
+                _babeldoc_args.append("--enhance-compatibility")
+            _babeldoc_args.append("--files=" + attempt_pdf_abs)
 
-            print(f"Execute translation command: {' '.join(_redact_openai_api_key(cmd))}")
-            print(f"working directory: {pdf_dir}")
+            # loky warns when only_physical_cores=True and physical detection fails. It only
+            # skips the warn branch when cpu_count_user < cpu_count_mp, so LOKY_MAX_CPU_COUNT
+            # must be strictly less than logical count (e.g. cap at 4).
+            _loky_max = str(min(4, os.cpu_count() or 4))
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                suffix=".py",
+                delete=False,
+                encoding="utf-8",
+            ) as f:
+                f.write(
+                    "import os\n"
+                    "os.environ.setdefault('LOKY_MAX_CPU_COUNT', %s)\n"
+                    "import sys\n"
+                    "sys.argv = ['babeldoc'] + %s\n"
+                    "if __name__ == '__main__':\n"
+                    "    from multiprocessing import freeze_support\n"
+                    "    freeze_support()\n"
+                    "    from babeldoc.main import cli\n"
+                    "    cli()\n" % (repr(_loky_max), repr(_babeldoc_args))
+                )
+                _wrapper_script = f.name
+            try:
+                cmd = [sys.executable, _wrapper_script]
+                print(f"Execute translation command: {' '.join(_redact_openai_api_key([sys.executable, _wrapper_script] + _babeldoc_args))}")
+                print(f"working directory: {original_cwd}")
 
-            process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1,
-                universal_newlines=True,
-            )
+                # Avoid loky/joblib physical-core probe on Windows (WinError 2); cap so warn branch is skipped
+                _env = os.environ.copy()
+                _env.setdefault("LOKY_MAX_CPU_COUNT", _loky_max)
 
-            with deps.translation_tasks_lock:
-                deps.translation_tasks[task_id]["process"] = process
+                process = subprocess.Popen(
+                    cmd,
+                    cwd=original_cwd,
+                    env=_env,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    bufsize=1,
+                    universal_newlines=True,
+                )
 
-            stdout_thread = threading.Thread(
-                target=read_output, args=(process.stdout, "STDOUT")
-            )
-            stderr_thread = threading.Thread(
-                target=read_output, args=(process.stderr, "STDERR")
-            )
-            stdout_thread.daemon = True
-            stderr_thread.daemon = True
-            stdout_thread.start()
-            stderr_thread.start()
+                with deps.translation_tasks_lock:
+                    deps.translation_tasks[task_id]["process"] = process
 
-            return_code = process.wait(timeout=3600)
+                stdout_thread = threading.Thread(
+                    target=read_output, args=(process.stdout, "STDOUT")
+                )
+                stderr_thread = threading.Thread(
+                    target=read_output, args=(process.stderr, "STDERR")
+                )
+                stdout_thread.daemon = True
+                stderr_thread.daemon = True
+                stdout_thread.start()
+                stderr_thread.start()
 
-            stdout_thread.join(timeout=1)
-            stderr_thread.join(timeout=1)
+                return_code = process.wait(timeout=3600)
 
-            produced_dual_file = os.path.join(
-                pdf_dir, f"{attempt_base_name}.zh.dual.pdf"
-            )
-            if os.path.exists(produced_dual_file):
-                return_code = 0
+                stdout_thread.join(timeout=1)
+                stderr_thread.join(timeout=1)
+
+                produced_dual_file = os.path.join(
+                    pdf_dir, f"{attempt_base_name}.zh.dual.pdf"
+                )
+                if os.path.exists(produced_dual_file):
+                    return_code = 0
+                    break
+
+                if return_code == 0:
+                    break
+
+                font_error_count = int(task_info.get("font_xobj_parse_errors") or 0)
+                if attempt_index == 0 and font_error_count > 0 and sanitized_pdf_filename is None:
+                    with log_lock:
+                        log_lines.append(
+                            "[PAPERLENS] Detected PDF font XObject parse errors; trying to sanitize PDF and retry."
+                        )
+                    sanitized_pdf_filename = f"{base_name}.paperlens.sanitized.pdf"
+                    sanitized_pdf_path = os.path.join(pdf_dir, sanitized_pdf_filename)
+                    _sanitize_pdf_for_babeldoc(pdf_path, sanitized_pdf_path)
+                    attempt_pdf_filename = sanitized_pdf_filename
+                    attempt_base_name = os.path.splitext(sanitized_pdf_filename)[0]
+                    enable_compatibility = True
+                    continue
+
                 break
-
-            if return_code == 0:
-                break
-
-            font_error_count = int(task_info.get("font_xobj_parse_errors") or 0)
-            if attempt_index == 0 and font_error_count > 0 and sanitized_pdf_filename is None:
-                with log_lock:
-                    log_lines.append(
-                        "[PAPERLENS] Detected PDF font XObject parse errors; trying to sanitize PDF and retry."
-                    )
-                sanitized_pdf_filename = f"{base_name}.paperlens.sanitized.pdf"
-                sanitized_pdf_path = os.path.join(pdf_dir, sanitized_pdf_filename)
-                _sanitize_pdf_for_babeldoc(pdf_path, sanitized_pdf_path)
-                attempt_pdf_filename = sanitized_pdf_filename
-                attempt_base_name = os.path.splitext(sanitized_pdf_filename)[0]
-                enable_compatibility = True
-                continue
-
-            break
+            finally:
+                try:
+                    if os.path.isfile(_wrapper_script):
+                        os.remove(_wrapper_script)
+                except OSError:
+                    pass
 
         with deps.translation_tasks_lock:
             if return_code == 0:
@@ -238,6 +279,31 @@ def translate_paper_task(
                         os.replace(produced_dual, dual_file)
                     if os.path.exists(produced_mono):
                         os.replace(produced_mono, mono_file)
+
+                # BabelDOC may write to cwd (original_cwd) instead of next to the input; or use a different filename.
+                if not os.path.exists(dual_file):
+                    for search_dir in (pdf_dir, original_cwd):
+                        candidates = glob.glob(os.path.join(search_dir, "*.zh.dual.pdf"))
+                        if not candidates:
+                            continue
+                        chosen = None
+                        if len(candidates) == 1:
+                            chosen = candidates[0]
+                        else:
+                            for p in candidates:
+                                stem = os.path.splitext(os.path.basename(p))[0].replace(".zh.dual", "")
+                                if stem == base_name or stem == attempt_base_name:
+                                    chosen = p
+                                    break
+                            if chosen is None:
+                                chosen = candidates[0]
+                        if chosen and chosen != dual_file:
+                            if os.path.dirname(chosen) != pdf_dir:
+                                shutil.move(chosen, dual_file)
+                            else:
+                                os.replace(chosen, dual_file)
+                        if os.path.exists(dual_file):
+                            break
 
                 if os.path.exists(dual_file):
                     if os.path.exists(mono_file):

@@ -477,6 +477,10 @@ class DailyArxivManager:
         # Progress tracking (by partition)
         self.progress: Dict[str, FetchProgress] = {}
 
+        # Cancel requested by category or all (user clicked cancel)
+        self._cancel_requested: Dict[str, bool] = {}
+        self._cancel_all: bool = False
+
         # scheduler
         self._scheduler_thread = None
         self._scheduler_running = False
@@ -572,6 +576,15 @@ class DailyArxivManager:
             self.progress[category] = FetchProgress()
         return self.progress[category].to_dict()
 
+    def request_cancel(self, category: Optional[str] = None) -> None:
+        """Request cancel of fetch for the given category, or all if category is None."""
+        if category is None:
+            self._cancel_all = True
+            for cat in list(self.progress.keys()):
+                self._cancel_requested[cat] = True
+        else:
+            self._cancel_requested[category] = True
+
     def fetch_papers(
         self,
         category: str,
@@ -592,9 +605,17 @@ class DailyArxivManager:
         if date_str is None:
             date_str = get_today_arxiv_date()
 
-        # Initialization progress
+        # If cancel all was requested, do not start this category
+        if self._cancel_all:
+            if category not in self.progress:
+                self.progress[category] = FetchProgress()
+            self.progress[category].set_done("Cancelled")
+            return []
+
+        # Initialization progress and clear cancel for this category
         if category not in self.progress:
             self.progress[category] = FetchProgress()
+        self._cancel_requested[category] = False
         progress = self.progress[category]
         progress.reset(0)  # The total number is unknown, will be updated later
 
@@ -702,6 +723,11 @@ class DailyArxivManager:
             )
             print(f"[DailyArxiv] Distribution of paper publication dates: {date_info}")
 
+            # Check cancel before starting download loop
+            if self._cancel_requested.get(category):
+                progress.set_done("Cancelled")
+                return []
+
             # Set processing progress
             progress.set_processing(len(results))
 
@@ -795,6 +821,11 @@ Now the input abstract is:
 
             print(f"[DailyArxiv] Start processing {len(results)} papers...")
             for i, result in enumerate(results):
+                if self._cancel_all or self._cancel_requested.get(category):
+                    progress.set_done("Cancelled")
+                    print(f"[DailyArxiv] Fetch cancelled by user at {i+1}/{len(results)}")
+                    return papers
+
                 try:
                     print(
                         f"[DailyArxiv] processing section {i+1}/{len(results)} papers..."

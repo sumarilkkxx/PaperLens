@@ -416,38 +416,27 @@ input:focus + .slider {
     color: inherit !important;
 }
 
-/* 3. Fix Daily arXiv Header Actions Alignment */
+/* 3. Daily arXiv Header Actions: single row, categories wrap (responsive to interests) */
 .daily-arxiv-actions {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    justify-content: center !important;
-    /* Removed flex: 1 to allow parent space-between to push this block to the right */
-    gap: 8px !important;
-}
-
-.daily-arxiv-actions-top {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: nowrap;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
 }
 
 /* Keep Daily arXiv header & filter panel button text on one line (fix vertical Chinese text) */
-.daily-arxiv-actions-top .btn,
-.daily-arxiv-actions-top button,
+.daily-arxiv-actions .btn,
 #daily-arxiv-filter,
 #daily-arxiv-settings,
 .daily-arxiv-filter-panel .filter-panel-header .filter-clear-btn {
     white-space: nowrap !important;
     min-width: fit-content;
 }
-.daily-arxiv-actions-top .btn span,
-.daily-arxiv-actions-top button span {
+.daily-arxiv-actions .btn span,
+.daily-arxiv-actions button span {
     white-space: nowrap !important;
 }
 
-/* Ensure categories inside align left (relative to the container) */
 .daily-arxiv-categories {
     justify-content: flex-start !important;
-    width: 100%;
 }

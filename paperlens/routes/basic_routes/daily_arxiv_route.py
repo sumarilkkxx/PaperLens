@@ -429,6 +429,10 @@ def register_daily_arxiv_routes(
             if not category:
                 return jsonify({"success": False, "error": "Please specify arXiv Partition"}), 400
 
+            # Clear cancel state for this run
+            manager._cancel_all = False
+            manager._cancel_requested.pop(category, None)
+
             # Execute the crawl in a background thread
             def do_fetch():
                 manager.fetch_papers(
@@ -478,6 +482,20 @@ def register_daily_arxiv_routes(
             return jsonify({"success": False, "error": str(exc)}), 500
 
     # ========================================
+    # Cancel Fetch
+    # ========================================
+    @app.route("/api/daily-arxiv/cancel", methods=["POST"])
+    def api_cancel_fetch():
+        """Cancel ongoing paper fetch (all categories or a specific one)."""
+        try:
+            data = request.json or {}
+            category = data.get("category")  # None = cancel all
+            manager.request_cancel(category)
+            return jsonify({"success": True, "message": "Cancel requested"})
+        except Exception as exc:
+            return jsonify({"success": False, "error": str(exc)}), 500
+
+    # ========================================
     # Fetch All Categories
     # ========================================
     @app.route("/api/daily-arxiv/fetch-all", methods=["POST"])
@@ -517,6 +535,10 @@ def register_daily_arxiv_routes(
 
             if not categories:
                 return jsonify({"success": False, "error": "No partition configured"}), 400
+
+            # Clear cancel state for this run
+            manager._cancel_all = False
+            manager._cancel_requested.clear()
 
             # Execute the crawl in a background thread
             def do_fetch_all():
