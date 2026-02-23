@@ -11288,6 +11288,20 @@ function startProgressPolling(category) {
     }, 2500);
 }
 
+// Cancel ongoing fetch and close progress bar (stops the entire recommendation process)
+async function cancelDailyArxivFetch() {
+    try {
+        await fetch('/api/daily-arxiv/cancel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+    } catch (e) {
+        console.error('Failed to request cancel:', e);
+    }
+    stopProgressPolling();
+}
+
 // Stop progress polling（Can stop specific partitions or all partitions）
 function stopProgressPolling(category = null) {
     if (category) {

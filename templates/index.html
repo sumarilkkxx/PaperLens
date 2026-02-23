@@ -236,6 +236,9 @@
             <div class="progress-header">
                 <span class="progress-title" id="daily-arxiv-progress-title" data-i18n="daily_arxiv_fetching_papers">Fetching papers...</span>
                 <span class="progress-count" id="daily-arxiv-progress-count">0/0</span>
+                <button type="button" class="btn btn-secondary daily-arxiv-progress-close" id="daily-arxiv-progress-close" title="Cancel fetch and close" onclick="cancelDailyArxivFetch()">
+                    <i class="fas fa-times"></i> <span data-i18n="daily_arxiv_cancel_fetch">Cancel</span>
+                </button>
             </div>
             <div class="progress-bar-container">
                 <div class="progress-bar" id="daily-arxiv-progress-bar" style="width: 0%"></div>

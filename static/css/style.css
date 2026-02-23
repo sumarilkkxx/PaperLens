@@ -3855,6 +3855,11 @@ mark {
     color: #64748b;
 }
 
+.daily-arxiv-progress-close {
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
 .progress-bar-container {
     height: 6px;
     background: #e2e8f0;
