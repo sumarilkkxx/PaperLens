@@ -40,6 +40,7 @@
             reading_list_label: 'Reading list',
             reading_list_empty: 'Reading list is empty',
             select_category_left: 'Select a category on the left to view PDF files',
+            empty_state_no_papers: 'There are currently no papers in this category.',
             empty_state_hint: 'Upload PDF or import from Daily arXiv to get started.',
             upload_pdf_btn: 'Upload PDF',
             daily_arxiv_btn: 'Daily arXiv',
@@ -67,7 +68,7 @@
             open_chinese_version: 'Open Chinese version',
             previous_day: 'Previous day',
             next_day: 'Next day',
-            tagline: 'Simplify Paper Reading',
+            tagline: 'Streamline Your Research Reading',
 
             // Batch toolbar
             batch_selected: 'Selected {n} items',
@@ -564,6 +565,7 @@
             reading_list_label: '阅读列表',
             reading_list_empty: '阅读列表为空',
             select_category_left: '请从左侧选择分类以查看 PDF',
+            empty_state_no_papers: '当前分类下暂无论文',
             empty_state_hint: '上传 PDF 或从每日 arXiv 导入以开始使用',
             upload_pdf_btn: '上传 PDF',
             daily_arxiv_btn: '每日 arXiv',
@@ -591,7 +593,7 @@
             open_chinese_version: '打开中文版',
             previous_day: '上一天',
             next_day: '下一天',
-            tagline: '简化论文阅读',
+            tagline: '畅享科研阅读',
 
             batch_selected: '已选 {n} 项',
             batch_analyze: '解读',
@@ -1079,6 +1081,10 @@
                 el.title = t(locale, key);
             }
         });
+        var taglineEl = document.getElementById('navbar-tagline');
+        if (taglineEl) {
+            taglineEl.textContent = 'Streamline Your Research Reading';
+        }
         document.documentElement.lang = locale === 'zh_CN' ? 'zh-Hans' : 'en';
         if (typeof window.__LOCALE !== 'undefined') {
             window.__LOCALE = locale;

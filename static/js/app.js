@@ -1261,14 +1261,17 @@ function renderPapersList() {
         papersList.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-file-pdf"></i>
-                <p>There are currently no papers in this category</p>
-                <p class="empty-state-hint">Upload PDF or import from Daily arXiv to get started.</p>
+                <p data-i18n="empty_state_no_papers">There are currently no papers in this category.</p>
+                <p class="empty-state-hint" data-i18n="empty_state_hint">Upload PDF or import from Daily arXiv to get started.</p>
                 <div class="empty-state-actions">
-                    <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('upload-btn').click()"><i class="fas fa-upload"></i> Upload PDF</button>
-                    <button type="button" class="btn btn-outline btn-sm" onclick="document.querySelector('.nav-tab[data-tab=&quot;daily-arxiv&quot;]').click()"><i class="fas fa-rss"></i> Daily arXiv</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('upload-btn').click()"><i class="fas fa-upload"></i> <span data-i18n="upload_pdf_btn">Upload PDF</span></button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="document.querySelector('.nav-tab[data-tab=&quot;daily-arxiv&quot;]').click()"><i class="fas fa-rss"></i> <span data-i18n="daily_arxiv_btn">Daily arXiv</span></button>
                 </div>
             </div>
         `;
+        if (typeof window.applyTranslations === 'function') {
+            window.applyTranslations(window.getLocale ? window.getLocale() : (window.__LOCALE || 'en'));
+        }
         sortControls.style.display = 'none';
         return;
     }

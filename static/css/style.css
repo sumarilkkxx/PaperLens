@@ -38,6 +38,9 @@ body {
     font-size: 18px;
     font-weight: 600;
     color: #333;
+    min-width: 0;
+    overflow: visible;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -2761,11 +2764,46 @@ mark {
 }
 
 .empty-state-actions {
-    margin-top: 16px;
+    margin-top: 20px;
     display: flex;
-    gap: 10px;
+    gap: 14px;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
+}
+
+/* 空状态操作按钮：统一尺寸与排布，视觉平衡 */
+.empty-state-actions .btn {
+    min-width: 160px;
+    height: 42px;
+    padding: 0 20px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: opacity 0.2s, transform 0.15s;
+}
+.empty-state-actions .btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+.empty-state-actions .btn i,
+.empty-state-actions .btn .arxiv-logo-icon {
+    margin: 0;
+    flex-shrink: 0;
+}
+/* Font Awesome 图标：与文字协调，不喧宾夺主 */
+.empty-state-actions .btn i {
+    font-size: 13px;
+    opacity: 0.95;
+}
+.empty-state-actions .btn .arxiv-logo-icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
 }
 
 /* modal box */
