@@ -227,6 +227,9 @@ body {
 
 /* 按钮 - Ant Design Button 风格 */
 .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     border-radius: var(--ant-radius-sm);
     transition: var(--ant-transition);
     font-weight: 500;
@@ -829,4 +832,78 @@ select.setting-input {
     background: var(--ant-primary-bg) !important;
     border-color: var(--ant-primary) !important;
     color: var(--ant-primary) !important;
+}
+
+/* ========== 导入/导出 - shadcn 风格统一 ========== */
+/* 导入类型 Tab（与 setting-nav-item / nav-tab 一致） */
+.import-type-tabs {
+    border-bottom-color: var(--ant-color-border-secondary) !important;
+}
+
+.import-type-tab {
+    color: var(--ant-color-text-secondary) !important;
+    border-bottom-color: transparent !important;
+}
+
+.import-type-tab:hover {
+    color: var(--ant-color-text) !important;
+    background: var(--ant-color-bg-layout) !important;
+}
+
+.import-type-tab.active {
+    color: var(--ant-primary) !important;
+    border-bottom-color: var(--ant-primary) !important;
+}
+
+/* 导入目标文件夹选择（与 setting-input / Select 一致） */
+.import-target-category {
+    background: var(--ant-color-bg-layout) !important;
+    border-radius: var(--ant-radius-sm);
+}
+
+.import-target-category label {
+    color: var(--ant-color-text) !important;
+}
+
+.import-target-category label i {
+    color: var(--ant-primary) !important;
+}
+
+.import-target-category select {
+    border: 1px solid var(--ant-color-border) !important;
+    border-radius: var(--ant-radius-sm) !important;
+    background: var(--ant-color-bg-container) !important;
+    color: var(--ant-color-text) !important;
+}
+
+.import-target-category select:focus {
+    outline: none !important;
+    border-color: var(--ant-primary) !important;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08) !important;
+}
+
+.import-target-category small {
+    color: var(--ant-color-text-secondary) !important;
+}
+
+/* 上传拖放区、导出说明框：保留 style.css 原有样式，此处不覆盖 */
+
+/* 导入进度条 */
+.import-progress-container {
+    background: var(--ant-color-bg-layout) !important;
+}
+
+.import-progress-fill,
+.export-progress-fill {
+    background: var(--ant-primary) !important;
+}
+
+/* 导入步骤说明（与主色一致） */
+.step-number {
+    background: var(--ant-primary) !important;
+    color: #fff !important;
+}
+
+.import-instructions .step-content strong {
+    color: var(--ant-color-text) !important;
 }
