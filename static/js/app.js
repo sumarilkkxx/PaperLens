@@ -6343,7 +6343,9 @@ async function renderOverviewStats() {
 
         let weekMinutes = 0;
         const weekDates = [];
-        for (let i = 0; i <= dayOfWeek || (dayOfWeek === 0 && i <= 6); i++) {
+        // Monday = 1 day, Tuesday = 2 days, ..., Sunday = 7 days (Monday through today inclusive)
+        const daysInWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+        for (let i = 0; i < daysInWeek; i++) {
             const date = new Date(monday);
             date.setDate(monday.getDate() + i);
             const dateStr = formatDateLocal(date);
