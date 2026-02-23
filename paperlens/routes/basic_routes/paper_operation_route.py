@@ -749,6 +749,66 @@ def register_paper_operation_routes(
             print(f"Record interpretation reading time failed: {exc}")
             return jsonify({"success": False, "error": str(exc)}), 500
 
+    def _get_annotations_path(paper_id: str) -> Optional[Tuple[str, str]]:
+        """Return (file_path, annotations_path) or None if paper not found."""
+        result = find_paper(paper_id)
+        if not result:
+            return None
+        paper, _category_path, _ = result
+        file_path = paper.file_path
+        if not file_path:
+            return None
+        if not os.path.isabs(file_path):
+            file_path = os.path.abspath(file_path)
+        if not os.path.exists(file_path):
+            return None
+        dir_path = os.path.dirname(file_path)
+        base_name = os.path.splitext(os.path.basename(file_path))[0]
+        ann_path = os.path.join(dir_path, base_name + ".annotations.json")
+        return (file_path, ann_path)
+
+    @app.route("/api/paper/<paper_id>/annotations", methods=["GET"])
+    def api_get_paper_annotations(paper_id: str):
+        """Get reading annotations (highlights, notes, bookmarks) for a paper."""
+        try:
+            res = _get_annotations_path(paper_id)
+            if not res:
+                return jsonify({"error": "Paper not found"}), 404
+            _file_path, ann_path = res
+            if not os.path.exists(ann_path):
+                return jsonify({"highlights": [], "notes": [], "bookmarks": []})
+            with open(ann_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return jsonify({
+                "highlights": data.get("highlights", []),
+                "notes": data.get("notes", []),
+                "bookmarks": data.get("bookmarks", []),
+            })
+        except Exception as exc:  # noqa: BLE001
+            print(f"Failed to get annotations: {exc}")
+            return jsonify({"success": False, "error": str(exc)}), 500
+
+    @app.route("/api/paper/<paper_id>/annotations", methods=["POST"])
+    def api_save_paper_annotations(paper_id: str):
+        """Save reading annotations (highlights, notes, bookmarks) for a paper."""
+        try:
+            res = _get_annotations_path(paper_id)
+            if not res:
+                return jsonify({"error": "Paper not found"}), 404
+            _file_path, ann_path = res
+            data = request.json or {}
+            payload = {
+                "highlights": data.get("highlights", []),
+                "notes": data.get("notes", []),
+                "bookmarks": data.get("bookmarks", []),
+            }
+            with open(ann_path, "w", encoding="utf-8") as f:
+                json.dump(payload, f, ensure_ascii=False, indent=2)
+            return jsonify({"success": True})
+        except Exception as exc:  # noqa: BLE001
+            print(f"Failed to save annotations: {exc}")
+            return jsonify({"success": False, "error": str(exc)}), 500
+
     @app.route("/api/paper/<paper_id>/refresh-metadata", methods=["POST"])
     def api_refresh_paper_metadata(paper_id: str):
         """Re-crawl PDF metadata"""

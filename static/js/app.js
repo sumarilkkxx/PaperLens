@@ -402,7 +402,7 @@ function setupEventListeners() {
         if (currentCategoryId || currentViewMode === 'reading-list') {
             fileInput.click();
         } else {
-            showMessage('Please select a category first', 'warning');
+            showMessage(window.__t ? window.__t('msg_select_category_first') : 'Please select a category first', 'warning');
         }
     });
 
@@ -410,7 +410,7 @@ function setupEventListeners() {
     const emptyStateUploadBtn = document.getElementById('empty-state-upload-btn');
     if (emptyStateUploadBtn) {
         emptyStateUploadBtn.addEventListener('click', () => {
-            showMessage('Please select a category first', 'warning');
+            showMessage(window.__t ? window.__t('msg_select_category_first') : 'Please select a category first', 'warning');
             document.getElementById('toggle-left-sidebar')?.click();
         });
     }
@@ -428,7 +428,7 @@ function setupEventListeners() {
         if (currentCategoryId || currentViewMode === 'reading-list') {
             showArxivUploadModal();
         } else {
-            showMessage('Please select a category first', 'warning');
+            showMessage(window.__t ? window.__t('msg_select_category_first') : 'Please select a category first', 'warning');
         }
     });
 
@@ -559,7 +559,7 @@ async function loadCategories(silent = false) {
         renderCategoryTree();
     } catch (error) {
         console.error('Failed to load categories:', error);
-        showMessage('Failed to load categories', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_load_categories') : 'Failed to load categories', 'error');
     } finally {
         if (!silent) {
             showLoading(false);
@@ -747,7 +747,7 @@ function createCategoryElement(category, level = 0) {
         if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
             e.preventDefault();
             if (isCategoryMultiSelectMode && selectedCategoryIds.size > 1) {
-                showMessage('Renaming is not supported in multi-select mode', 'warning');
+                showMessage(window.__t ? window.__t('msg_renaming_not_supported_multi') : 'Renaming is not supported in multi-select mode', 'warning');
                 return;
             }
             startInlineRename(div, category);
@@ -906,7 +906,7 @@ async function loadPapers(categoryId, recursive = false) {
         const response = await fetch(apiUrl);
         if (!response.ok) {
             console.error(`Failed to load paper: ${response.status} ${response.statusText}`);
-            showMessage('Failed to load paper', 'error');
+            showMessage(window.__t ? window.__t('msg_failed_load_paper') : 'Failed to load paper', 'error');
             return;
         }
         papers = await response.json();
@@ -915,7 +915,7 @@ async function loadPapers(categoryId, recursive = false) {
         renderPapersList();
     } catch (error) {
         console.error('Failed to load papers:', error);
-        showMessage('Failed to load papers', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_load_papers') : 'Failed to load papers', 'error');
     }
 }
 
@@ -985,7 +985,7 @@ async function showReadingList(preloadedPapers = null) {
         renderPapersList();
     } catch (error) {
         console.error('Failed to load reading list:', error);
-        showMessage('Failed to load reading list', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_load_reading_list') : 'Failed to load reading list', 'error');
     }
 }
 
@@ -1032,7 +1032,7 @@ async function addToReadingList(paperId, event) {
             method: 'POST'
         });
         if (response.ok) {
-            showMessage('Added to to-read list', 'success');
+            showMessage(window.__t ? window.__t('msg_added_to_read_list') : 'Added to to-read list', 'success');
             // renewIDSets and counting
             readingListPaperIds.add(paperId);
             await updateReadingListCount();
@@ -1041,11 +1041,11 @@ async function addToReadingList(paperId, event) {
                 renderPapersList();
             }
         } else {
-            showMessage('Failed to add to reading list', 'error');
+            showMessage(window.__t ? window.__t('msg_failed_add_reading_list') : 'Failed to add to reading list', 'error');
         }
     } catch (error) {
         console.error('Failed to add to reading list:', error);
-        showMessage('Failed to add to reading list', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_add_reading_list') : 'Failed to add to reading list', 'error');
     }
 }
 
@@ -1074,7 +1074,7 @@ async function removeFromReadingList(paperId, event) {
                 });
                 const deleteData = await deleteResponse.json();
                 if (deleteData.success) {
-                    showMessage('Removed from reading list and deleted related files', 'success');
+                    showMessage(window.__t ? window.__t('msg_removed_deleted') : 'Removed from reading list and deleted related files', 'success');
                     // renewIDSets and counting
                     readingListPaperIds.delete(paperId);
                     const updatedPapers = await updateReadingListCount();
@@ -1119,7 +1119,7 @@ async function removeFromReadingList(paperId, event) {
         }
     } catch (error) {
         console.error('Failed to remove from reading list:', error);
-        showMessage('Failed to remove from reading list', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_remove_reading_list') : 'Failed to remove from reading list', 'error');
     }
 }
 
@@ -1175,7 +1175,7 @@ function generatePaperItemHTML(paper, showCheckbox = false) {
         </div>`;
     } else if (tStatus && tStatus.status === 'queued') {
         const currentIndex = translationQueue.indexOf(paper.id) + 1;
-        const queueText = currentIndex > 0 ? `Queue ${currentIndex}` : 'Queueing';
+        const _t = window.__t || (k => k); const queueText = currentIndex > 0 ? _t('status_queue_n').replace('{n}', currentIndex) : _t('status_queueing');
         translateCol = `<div class="paper-col-action">
             <div style="display: flex; flex-direction: column; width: 100%; gap: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
@@ -1217,7 +1217,7 @@ function generatePaperItemHTML(paper, showCheckbox = false) {
         </div>`;
     } else if (aStatus && aStatus.status === 'queued') {
         const currentIndex = analysisQueue.indexOf(paper.id) + 1;
-        const queueText = currentIndex > 0 ? `Queue ${currentIndex}` : 'Queueing';
+        const _t = window.__t || (k => k); const queueText = currentIndex > 0 ? _t('status_queue_n').replace('{n}', currentIndex) : _t('status_queueing');
         analyzeCol = `<div class="paper-col-action">
             <div style="display: flex; flex-direction: column; width: 100%; gap: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
@@ -1231,9 +1231,11 @@ function generatePaperItemHTML(paper, showCheckbox = false) {
             </div>
         </div>`;
     } else if (paper.has_analysis_result) {
-        analyzeCol = `<div class="paper-col-action"><button class="paper-col-btn view analysis" onclick="viewAnalysisResult('${paper.id}', event)"><i class="fas fa-brain"></i> AI Interpretation</button></div>`;
+        const _colInterpret = (window.__t || (k => k))('col_ai_interpretation');
+        analyzeCol = `<div class="paper-col-action"><button class="paper-col-btn view analysis" onclick="viewAnalysisResult('${paper.id}', event)"><i class="fas fa-brain"></i> ${_colInterpret}</button></div>`;
     } else {
-        analyzeCol = `<div class="paper-col-action"><button class="paper-col-btn analyze icon-only" onclick="requestAnalysis('${paper.id}', event)" title="AI Interpretation"><i class="fas fa-brain"></i></button></div>`;
+        const _colInterpret2 = (window.__t || (k => k))('col_ai_interpretation');
+        analyzeCol = `<div class="paper-col-action"><button class="paper-col-btn analyze icon-only" onclick="requestAnalysis('${paper.id}', event)" title="${_colInterpret2}"><i class="fas fa-brain"></i></button></div>`;
     }
 
     // AI Interaction column
@@ -1286,12 +1288,12 @@ function renderPapersList() {
     papersList.innerHTML = `
         <div class="paper-header">
             <div class="paper-header-col"></div>
-            <div class="paper-header-col">title<div class="paper-header-resizer" data-col="1"></div></div>
-            <div class="paper-header-col">date<div class="paper-header-resizer" data-col="2"></div></div>
-            <div class="paper-header-col">AI translate<div class="paper-header-resizer" data-col="3"></div></div>
-            <div class="paper-header-col">AI Interpretation<div class="paper-header-resizer" data-col="4"></div></div>
-            <div class="paper-header-col">AI Interaction<div class="paper-header-resizer" data-col="5"></div></div>
-            <div class="paper-header-col">To be read</div>
+            <div class="paper-header-col">${(window.__t || (k => k))('col_title')}<div class="paper-header-resizer" data-col="1"></div></div>
+            <div class="paper-header-col">${(window.__t || (k => k))('col_date')}<div class="paper-header-resizer" data-col="2"></div></div>
+            <div class="paper-header-col">${(window.__t || (k => k))('col_ai_translate')}<div class="paper-header-resizer" data-col="3"></div></div>
+            <div class="paper-header-col">${(window.__t || (k => k))('col_ai_interpretation')}<div class="paper-header-resizer" data-col="4"></div></div>
+            <div class="paper-header-col">${(window.__t || (k => k))('col_ai_interaction')}<div class="paper-header-resizer" data-col="5"></div></div>
+            <div class="paper-header-col">${(window.__t || (k => k))('col_to_be_read')}</div>
         </div>
     `;
 
@@ -1376,7 +1378,7 @@ async function loadPaperInfo(paperId) {
         renderPaperInfo(paper);
     } catch (error) {
         console.error('Failed to load paper info:', error);
-        showMessage('Failed to load paper info', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_load_paper_info') : 'Failed to load paper info', 'error');
     }
 }
 
@@ -1695,10 +1697,10 @@ function copyBibtex(paperId) {
     if (bibtexElem) {
         const text = bibtexElem.textContent;
         navigator.clipboard.writeText(text).then(() => {
-            showMessage('BibTeX Copied to clipboard', 'success', 2000);
+            showMessage(window.__t ? window.__t('msg_bibtex_copied') : 'BibTeX Copied to clipboard', 'success', 2000);
         }).catch(err => {
             console.error('Copy failed:', err);
-            showMessage('Copy failed', 'error');
+            showMessage(window.__t ? window.__t('msg_copy_failed') : 'Copy failed', 'error');
         });
     }
 }
@@ -1728,11 +1730,11 @@ async function savePaperField(paperId, field, value) {
                 }
             }
         } else {
-            showMessage('Save failed', 'error');
+            showMessage(window.__t ? window.__t('msg_save_failed') : 'Save failed', 'error');
         }
     } catch (error) {
         console.error('Failed to save paper information:', error);
-        showMessage('Save failed', 'error');
+        showMessage(window.__t ? window.__t('msg_save_failed') : 'Save failed', 'error');
     }
 }
 
@@ -1859,7 +1861,7 @@ function setupDragAndDrop() {
         } else if (currentCategoryId) {
             handleFilesWithCategory(e.dataTransfer.files, currentCategoryId);
         } else {
-            showMessage('Please select a category first', 'warning');
+            showMessage(window.__t ? window.__t('msg_select_category_first') : 'Please select a category first', 'warning');
         }
     });
 
@@ -1885,7 +1887,7 @@ function setupDragAndDrop() {
             } else if (currentCategoryId) {
                 handleFilesWithCategory(e.dataTransfer.files, currentCategoryId);
             } else {
-                showMessage('Please select a category first', 'warning');
+                showMessage(window.__t ? window.__t('msg_select_category_first') : 'Please select a category first', 'warning');
             }
         }, false);
         uploadZone.addEventListener('click', () => {
@@ -1895,7 +1897,7 @@ function setupDragAndDrop() {
             } else if (currentCategoryId) {
                 fileInput.click();
             } else {
-                showMessage('Please select a category first', 'warning');
+                showMessage(window.__t ? window.__t('msg_select_category_first') : 'Please select a category first', 'warning');
             }
         });
     }
@@ -1910,7 +1912,7 @@ function handleFileSelect(e) {
     } else if (currentCategoryId) {
         handleFilesWithCategory(files, currentCategoryId);
     } else {
-        showMessage('Please select a category first', 'warning');
+        showMessage(window.__t ? window.__t('msg_select_category_first') : 'Please select a category first', 'warning');
     }
 }
 
@@ -1957,7 +1959,7 @@ async function uploadFile(file, categoryId) {
                     if (categoryId === 'reading_list_temp' && currentViewMode === 'reading-list') {
                         showReadingList(updatedPapers);
                     }
-                    showMessage('Upload successful', 'success');
+                    showMessage(window.__t ? window.__t('msg_upload_success') : 'Upload successful', 'success');
                     showLoading(false);
 
                     // Start background polling to check whether the metadata update is completed
@@ -1988,7 +1990,7 @@ async function uploadFile(file, categoryId) {
 
     } catch (error) {
         console.error('Upload request failed:', error);
-        showMessage('Upload failed', 'error');
+        showMessage(window.__t ? window.__t('msg_upload_failed') : 'Upload failed', 'error');
     }
 }
 
@@ -2286,8 +2288,8 @@ function showAddCategoryModal(parentId) {
     confirmBtn = document.getElementById('modal-confirm');
     cancelBtn = document.getElementById('modal-cancel');
     confirmBtn.style.display = 'inline-block';
-    confirmBtn.textContent = 'confirm';
-    cancelBtn.textContent = 'Cancel';
+    confirmBtn.textContent = (window.__t || (k => k))('btn_confirm');
+    cancelBtn.textContent = (window.__t || (k => k))('btn_cancel');
 
     confirmBtn.onclick = () => {
         const name = document.getElementById('category-name').value.trim();
@@ -2295,7 +2297,7 @@ function showAddCategoryModal(parentId) {
             addCategory(parentId, name);
             hideModal();
         } else {
-            showMessage('Please enter the category name', 'warning');
+            showMessage(window.__t ? window.__t('msg_please_enter_category_name') : 'Please enter the category name', 'warning');
         }
     };
     cancelBtn.onclick = () => hideModal();
@@ -2336,7 +2338,7 @@ function showRenameCategoryModal(categoryId) {
             renameCategory(categoryId, name);
             hideModal();
         } else if (!name) {
-            showMessage('Please enter the category name', 'warning');
+            showMessage(window.__t ? window.__t('msg_please_enter_category_name') : 'Please enter the category name', 'warning');
         } else {
             hideModal();
         }
@@ -2375,7 +2377,7 @@ async function addCategory(parentId, name) {
         const result = await response.json();
 
         if (result.success) {
-            showMessage('Category added successfully', 'success');
+            showMessage(window.__t ? window.__t('msg_category_added') : 'Category added successfully', 'success');
             // Update local data instead of reloading the entire tree
             await updateCategoriesData();
             // Keep expanded and selected
@@ -2385,7 +2387,7 @@ async function addCategory(parentId, name) {
         }
     } catch (error) {
         console.error('Failed to add category:', error);
-        showMessage('Failed to add category', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_add_category') : 'Failed to add category', 'error');
     }
 }
 
@@ -2405,7 +2407,7 @@ async function renameCategory(categoryId, newName) {
         const result = await response.json();
 
         if (result.success) {
-            showMessage('Category renamed successfully', 'success');
+            showMessage(window.__t ? window.__t('msg_category_renamed') : 'Category renamed successfully', 'success');
             // Update local data instead of reloading the entire tree
             await updateCategoriesData();
             // Keep expanded and selected
@@ -2415,7 +2417,7 @@ async function renameCategory(categoryId, newName) {
         }
     } catch (error) {
         console.error('Failed to rename category:', error);
-        showMessage('Failed to rename category', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_rename_category') : 'Failed to rename category', 'error');
     }
 }
 
@@ -2423,7 +2425,7 @@ async function renameCategory(categoryId, newName) {
 // Export classified BibTeX
 async function exportCategoryBibtex(categoryId) {
     try {
-        showMessage('Exporting BibTeX...', 'info', 2000);
+        showMessage(window.__t ? window.__t('msg_export_bibtex_ing') : 'Exporting BibTeX...', 'info', 2000);
 
         const response = await fetch(`/api/categories/${categoryId}/export-bibtex`, {
             method: 'GET'
@@ -2460,16 +2462,16 @@ async function exportCategoryBibtex(categoryId) {
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
 
-        showMessage('BibTeX Export successful', 'success');
+        showMessage(window.__t ? window.__t('msg_bibtex_export_ok') : 'BibTeX Export successful', 'success');
     } catch (error) {
         console.error('Export BibTeX fail:', error);
-        showMessage('Export failed, please try again later', 'error');
+        showMessage(window.__t ? window.__t('msg_export_failed_try') : 'Export failed, please try again later', 'error');
     }
 }
 
 async function copyCategoryArxivUrls(categoryId) {
     try {
-        showMessage('Getting arXiv URL...', 'info', 2000);
+        showMessage(window.__t ? window.__t('msg_getting_arxiv_url') : 'Getting arXiv URL...', 'info', 2000);
 
         const response = await fetch(`/api/categories/${categoryId}/copy-arxiv-urls`, {
             method: 'GET'
@@ -2499,14 +2501,14 @@ async function copyCategoryArxivUrls(categoryId) {
                 document.execCommand('copy');
                 showMessage(`Copied ${result.count} indivual arXiv URL to clipboard`, 'success');
             } catch (err) {
-                showMessage('Copy failed, please copy manually', 'error');
+                showMessage(window.__t ? window.__t('msg_copy_failed_manually') : 'Copy failed, please copy manually', 'error');
                 console.error('Copy failed:', err);
             }
             document.body.removeChild(textarea);
         }
     } catch (error) {
         console.error('copy arXiv URL fail:', error);
-        showMessage('Copy failed, please try again later', 'error');
+        showMessage(window.__t ? window.__t('msg_copy_failed_try') : 'Copy failed, please try again later', 'error');
     }
 }
 
@@ -2535,7 +2537,7 @@ async function deleteCategory(categoryId) {
         }
     } catch (error) {
         console.error('Failed to delete category:', error);
-        showMessage('Failed to delete category', 'error');
+        showMessage(window.__t ? window.__t('msg_delete_failed') : 'Failed to delete category', 'error');
     }
 }
 
@@ -2801,7 +2803,7 @@ async function togglePinCategory(categoryId) {
     }
 
     // Show success message
-    showMessage(newPinned ? 'Pinned' : 'Unpinned', 'success');
+    showMessage(window.__t ? (newPinned ? window.__t('msg_pinned') : window.__t('msg_unpinned')) : (newPinned ? 'Pinned' : 'Unpinned'), 'success');
 
     // Asynchronously save to server（Not blockingUI）
     fetch(`/api/categories/${categoryId}/pin`, {
@@ -2816,7 +2818,7 @@ async function togglePinCategory(categoryId) {
                 category.pinned = originalPinned;
                 // Re-render to restore state
                 renderCategoryTreeWithState();
-                showMessage('Operation failed', 'error');
+                showMessage(window.__t ? window.__t('msg_operation_failed') : 'Operation failed', 'error');
             }
         })
         .catch(e => {
@@ -2825,7 +2827,7 @@ async function togglePinCategory(categoryId) {
             category.pinned = originalPinned;
             // Re-render to restore state
             renderCategoryTreeWithState();
-            showMessage('Operation failed', 'error');
+            showMessage(window.__t ? window.__t('msg_operation_failed') : 'Operation failed', 'error');
         });
 }
 
@@ -2867,7 +2869,7 @@ async function changeCategoryColor(categoryId, color) {
                     }
                 }
                 category.iconColor = originalColor;
-                showMessage('Update failed', 'error');
+                showMessage(window.__t ? window.__t('msg_update_failed_try') : 'Update failed', 'error');
             }
         })
         .catch(e => {
@@ -2880,7 +2882,7 @@ async function changeCategoryColor(categoryId, color) {
                 }
             }
             category.iconColor = originalColor;
-            showMessage('Update failed', 'error');
+            showMessage(window.__t ? window.__t('msg_update_failed_try') : 'Update failed', 'error');
         });
 }
 
@@ -3338,7 +3340,7 @@ async function movePaper(paperId, targetCategoryId) {
         }
     } catch (error) {
         console.error('Failed to move paper:', error);
-        showMessage('Failed to move paper', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_move_paper') : 'Failed to move paper', 'error');
     }
 }
 
@@ -3359,7 +3361,7 @@ async function moveCategory(categoryId, targetParentId) {
 
         if (result.success) {
             console.log('Directory moved successfully:', result.old_path, '->', result.new_path);
-            showMessage('Directory moved successfully', 'success');
+            showMessage(window.__t ? window.__t('msg_directory_moved_ok') : 'Directory moved successfully', 'success');
 
             // Update local data and re-render the classification tree
             await updateCategoriesData();
@@ -3378,7 +3380,7 @@ async function moveCategory(categoryId, targetParentId) {
         }
     } catch (error) {
         console.error('Failed to move directory:', error);
-        showMessage('Failed to move directory', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_move_dir') : 'Failed to move directory', 'error');
     }
 }
 
@@ -3446,7 +3448,7 @@ async function moveCategories(categoryIds, targetParentId) {
 function openChineseVersion(paperId) {
     const paper = papers.find(p => p.id === paperId);
     if (!paper || !paper.has_chinese_version) {
-        showMessage('Chinese version does not exist', 'error');
+        showMessage(window.__t ? window.__t('msg_chinese_version_not_exist') : 'Chinese version does not exist', 'error');
         return;
     }
     const viewerUrl = `/viewer/${paperId}?chinese=true`;
@@ -3507,12 +3509,12 @@ function showArxivUploadModal() {
 
         const arxivUrl = document.getElementById('arxiv-url').value.trim();
         if (!arxivUrl) {
-            showMessage('Please enter arXiv URL or ID', 'warning');
+            showMessage(window.__t ? window.__t('msg_please_enter_arxiv_url') : 'Please enter arXiv URL or ID', 'warning');
             return;
         }
         // Non-blocking import: close the pop-up window immediately and import in the background
         hideModal();
-        showMessage('Start background import…', 'success');
+        showMessage(window.__t ? window.__t('msg_start_background_import') : 'Start background import…', 'success');
 
         // Background download and refresh category count when complete/Current list
         (async () => {
@@ -3538,7 +3540,7 @@ function showArxivUploadModal() {
                 });
                 const result = await response.json();
                 if (response.ok && result.success) {
-                    showMessage('Paper imported successfully', 'success');
+                    showMessage(window.__t ? window.__t('msg_paper_imported_ok') : 'Paper imported successfully', 'success');
                     // First update the to-be-read list count andIDCollection to ensure status synchronization
                     await updateReadingListCount();
                     if (isInReadingList) {
@@ -3554,7 +3556,7 @@ function showArxivUploadModal() {
                 }
             } catch (err) {
                 console.error('import arXiv Thesis failed:', err);
-                showMessage('Import failed, please try again later', 'error');
+                showMessage(window.__t ? window.__t('msg_import_failed_try') : 'Import failed, please try again later', 'error');
             }
         })();
     };
@@ -3700,11 +3702,11 @@ function renderSearchResults(panel, q, results) {
                             papersList.innerHTML = `
                                 <div class="paper-header">
                                     <div class="paper-header-col"></div>
-                                    <div class="paper-header-col">title<div class="paper-header-resizer" data-col="1"></div></div>
-                                    <div class="paper-header-col">date<div class="paper-header-resizer" data-col="2"></div></div>
-                                    <div class="paper-header-col">AI translate<div class="paper-header-resizer" data-col="3"></div></div>
-                                    <div class="paper-header-col">AI Interpretation<div class="paper-header-resizer" data-col="4"></div></div>
-                                    <div class="paper-header-col">To be read</div>
+                                    <div class="paper-header-col">${(window.__t || (k => k))('col_title')}<div class="paper-header-resizer" data-col="1"></div></div>
+                                    <div class="paper-header-col">${(window.__t || (k => k))('col_date')}<div class="paper-header-resizer" data-col="2"></div></div>
+                                    <div class="paper-header-col">${(window.__t || (k => k))('col_ai_translate')}<div class="paper-header-resizer" data-col="3"></div></div>
+                                    <div class="paper-header-col">${(window.__t || (k => k))('col_ai_interpretation')}<div class="paper-header-resizer" data-col="4"></div></div>
+                                    <div class="paper-header-col">${(window.__t || (k => k))('col_to_be_read')}</div>
                                 </div>
                             `;
                             // Add column width adjustment function
@@ -3789,11 +3791,11 @@ async function refreshPaperMetadata(paperId) {
     try {
         const paper = papers.find(p => p.id === paperId);
         if (!paper) {
-            showMessage('Paper not found', 'error');
+            showMessage(window.__t ? window.__t('msg_paper_not_found') : 'Paper not found', 'error');
             return;
         }
 
-        showMessage('Recrawling metadata...', 'info', 2000);
+        showMessage(window.__t ? window.__t('msg_recrawling_metadata') : 'Recrawling metadata...', 'info', 2000);
 
         const response = await fetch(`/api/paper/${paperId}/refresh-metadata`, {
             method: 'POST'
@@ -3801,7 +3803,7 @@ async function refreshPaperMetadata(paperId) {
 
         if (response.ok) {
             const result = await response.json();
-            showMessage('Metadata fetched successfully and is being updated...', 'success', 2000);
+            showMessage(window.__t ? window.__t('msg_metadata_updated_ok') : 'Metadata fetched successfully and is being updated...', 'success', 2000);
 
             // Start polling to detect updates
             const initialTitle = paper.title;
@@ -3813,7 +3815,7 @@ async function refreshPaperMetadata(paperId) {
         }
     } catch (error) {
         console.error('Recrawling metadata failed:', error);
-        showMessage('Fetching failed, please try again later', 'error');
+        showMessage(window.__t ? window.__t('msg_fetching_failed_try') : 'Fetching failed, please try again later', 'error');
     }
 }
 
@@ -3836,7 +3838,7 @@ async function deletePaper(paperId, event = null) {
 
         const response = await fetch(`/api/paper/${paperId}`, { method: 'DELETE' });
         if (response.ok) {
-            showMessage('Paper deleted successfully', 'success');
+            showMessage(window.__t ? window.__t('msg_paper_deleted_ok') : 'Paper deleted successfully', 'success');
             await updateCategoriesData();
             renderCategoryTreeWithState();
             updateReadingListCount();
@@ -3848,7 +3850,7 @@ async function deletePaper(paperId, event = null) {
         }
     } catch (error) {
         console.error('Failed to delete paper:', error);
-        showMessage('Deletion failed, please try again later', 'error');
+        showMessage(window.__t ? window.__t('msg_deletion_failed_try') : 'Deletion failed, please try again later', 'error');
         if (currentCategoryId) loadPapers(currentCategoryId);
     }
 }
@@ -3860,7 +3862,7 @@ async function toggleStar(paperId, event) {
     try {
         const paper = papers.find(p => p.id === paperId);
         if (!paper) {
-            showMessage('Paper not found', 'error');
+            showMessage(window.__t ? window.__t('msg_paper_not_found') : 'Paper not found', 'error');
             return;
         }
 
@@ -3888,13 +3890,13 @@ async function toggleStar(paperId, event) {
                 selectPaper(paperId);
             }
 
-            showMessage(newStarred ? 'Liked' : 'Like canceled', 'success');
+            showMessage(window.__t ? (newStarred ? window.__t('msg_liked') : window.__t('msg_like_canceled')) : (newStarred ? 'Liked' : 'Like canceled'), 'success');
         } else {
-            showMessage('Operation failed', 'error');
+            showMessage(window.__t ? window.__t('msg_operation_failed') : 'Operation failed', 'error');
         }
     } catch (error) {
         console.error('Failed to switch like status:', error);
-        showMessage('Operation failed, please try again later', 'error');
+        showMessage(window.__t ? window.__t('msg_operation_failed_try') : 'Operation failed, please try again later', 'error');
     }
 }
 
@@ -3906,7 +3908,7 @@ async function editPaper(paperId, event) {
         // Get paper information
         const response = await fetch(`/api/paper/${paperId}`);
         if (!response.ok) {
-            showMessage('Failed to obtain paper information', 'error');
+            showMessage(window.__t ? window.__t('msg_failed_obtain_paper_info') : 'Failed to obtain paper information', 'error');
             return;
         }
 
@@ -3973,7 +3975,7 @@ async function editPaper(paperId, event) {
 
                 if (updateResponse.ok) {
                     const result = await updateResponse.json();
-                    showMessage('Paper information updated successfully', 'success');
+                    showMessage(window.__t ? window.__t('msg_paper_info_updated_ok') : 'Paper information updated successfully', 'success');
                     hideModal();
 
                     // If the title is modified, the background will automatically re-fetch and start polling.
@@ -4009,7 +4011,7 @@ async function editPaper(paperId, event) {
                 }
             } catch (error) {
                 console.error('Failed to update paper information:', error);
-                showMessage('Update failed, please try again later', 'error');
+                showMessage(window.__t ? window.__t('msg_update_failed_try') : 'Update failed, please try again later', 'error');
             }
         };
 
@@ -4018,7 +4020,7 @@ async function editPaper(paperId, event) {
 
     } catch (error) {
         console.error('Failed to edit paper:', error);
-        showMessage('Editing failed, please try again later', 'error');
+        showMessage(window.__t ? window.__t('msg_editing_failed_try') : 'Editing failed, please try again later', 'error');
     }
 }
 
@@ -4046,7 +4048,7 @@ async function openMovePaperPicker(paperId, event) {
 
         confirmBtn.onclick = async () => {
             const selected = treeContainer.querySelector('input[name="target-category"]:checked');
-            if (!selected) { showMessage('Please select the target directory', 'warning'); return; }
+            if (!selected) { showMessage(window.__t ? window.__t('msg_please_select_target_dir') : 'Please select the target directory', 'warning'); return; }
             const targetId = selected.value;
             try {
                 await movePaper(paperId, targetId);
@@ -4058,7 +4060,7 @@ async function openMovePaperPicker(paperId, event) {
         showModal();
     } catch (e) {
         console.error('Failed to open mobile selector', e);
-        showMessage('Failed to open mobile selector', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_open_mobile_selector') : 'Failed to open mobile selector', 'error');
     }
 }
 
@@ -4460,7 +4462,7 @@ function startInlineAddCategory(parentId) {
         // Add in subdirectory
         const parentElement = document.querySelector(`[data-category-id="${parentId}"]`);
         if (!parentElement) {
-            showMessage('Parent category not found', 'error');
+            showMessage(window.__t ? window.__t('msg_parent_category_not_found') : 'Parent category not found', 'error');
             return;
         }
 
@@ -4575,7 +4577,7 @@ function startInlineAddCategory(parentId) {
                 const result = await response.json();
 
                 if (result.success) {
-                    showMessage('Category added successfully', 'success');
+                    showMessage(window.__t ? window.__t('msg_category_added') : 'Category added successfully', 'success');
                     // Remove temporary elements
                     tempContainer.remove();
                     // Update and re-render
@@ -4587,7 +4589,7 @@ function startInlineAddCategory(parentId) {
                 }
             } catch (error) {
                 console.error('Failed to add category:', error);
-                showMessage('Failed to add category', 'error');
+                showMessage(window.__t ? window.__t('msg_failed_add_category') : 'Failed to add category', 'error');
                 tempContainer.remove();
             }
         } else {
@@ -4649,7 +4651,7 @@ function handleMultiSelectClick(e, paperId) {
 }
 
 async function onBatchAnalyze() {
-    if (selectedPaperIds.size === 0) { showMessage('Please select a paper first', 'warning'); return; }
+    if (selectedPaperIds.size === 0) { showMessage(window.__t ? window.__t('msg_please_select_paper_first') : 'Please select a paper first', 'warning'); return; }
     const ids = Array.from(selectedPaperIds);
     for (const id of ids) {
         await requestAnalysis(id);
@@ -4658,7 +4660,7 @@ async function onBatchAnalyze() {
 }
 
 async function onBatchTranslate() {
-    if (selectedPaperIds.size === 0) { showMessage('Please select a paper first', 'warning'); return; }
+    if (selectedPaperIds.size === 0) { showMessage(window.__t ? window.__t('msg_please_select_paper_first') : 'Please select a paper first', 'warning'); return; }
 
     // Check user's AI output language setting first
     const userSettings = await getUserSettings();
@@ -4679,7 +4681,7 @@ async function onBatchTranslate() {
 }
 
 async function onBatchDelete() {
-    if (selectedPaperIds.size === 0) { showMessage('Please select a paper first', 'warning'); return; }
+    if (selectedPaperIds.size === 0) { showMessage(window.__t ? window.__t('msg_please_select_paper_first') : 'Please select a paper first', 'warning'); return; }
     const ids = Array.from(selectedPaperIds);
     // Optimistic update: remove from frontend first
     papers = papers.filter(p => !selectedPaperIds.has(p.id));
@@ -5222,7 +5224,7 @@ async function testLLMAPIByScenario(scenarioKey) {
     if (!llmModel || !llmBaseUrl || !llmApiKey) {
         resultDiv.innerHTML = `
             <div style="padding: 12px; background: #fff3cd; border: 1px solid #ca8a04; border-radius: 6px; color: #856404;">
-                <i class="fas fa-exclamation-triangle"></i> Please fill in the complete LLM API Configuration
+                <i class="fas fa-exclamation-triangle"></i> ${(window.__t || (k => k))('llm_fill_complete_config')}
             </div>
         `;
         resultDiv.style.display = 'block';
@@ -5231,11 +5233,12 @@ async function testLLMAPIByScenario(scenarioKey) {
 
     const originalHTML = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Under test...';
+    const _t = window.__t || (k => k);
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + _t('llm_under_test');
     resultDiv.style.display = 'block';
     resultDiv.innerHTML = `
         <div style="padding: 12px; background: #e7f3ff; border: 1px solid #2196F3; border-radius: 6px; color: #0d47a1;">
-            <i class="fas fa-spinner fa-spin"></i> Testing LLM API connect...
+            <i class="fas fa-spinner fa-spin"></i> ${_t('llm_testing_connect')}
         </div>
     `;
 
@@ -5251,7 +5254,7 @@ async function testLLMAPIByScenario(scenarioKey) {
     } else {
         resultDiv.innerHTML = `
             <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc2626; border-radius: 6px; color: #721c24;">
-                <i class="fas fa-times-circle"></i> <strong>test failed</strong>
+                <i class="fas fa-times-circle"></i> <strong>${(window.__t || (k => k))('llm_test_failed')}</strong>
                 <div style="margin-top: 8px; font-size: 13px;">${data.error || 'unknown error'}</div>
             </div>
         `;
@@ -5290,7 +5293,7 @@ async function testMineruAPI(event) {
         if (!mineruServerUrl) {
             resultDiv.innerHTML = `
                 <div style="padding: 12px; background: #fff3cd; border: 1px solid #ca8a04; border-radius: 6px; color: #856404;">
-                    <i class="fas fa-exclamation-triangle"></i> Please fill in first MinerU Server URL
+                    <i class="fas fa-exclamation-triangle"></i> ${(window.__t || (k => k))('mineru_fill_url')}
                 </div>
             `;
             resultDiv.style.display = 'block';
@@ -5301,7 +5304,7 @@ async function testMineruAPI(event) {
 
         resultDiv.innerHTML = `
             <div style="padding: 12px; background: #e7f3ff; border: 1px solid #2196F3; border-radius: 6px; color: #0d47a1;">
-                <i class="fas fa-spinner fa-spin"></i> Testing MinerU Server connect...
+                <i class="fas fa-spinner fa-spin"></i> ${(window.__t || (k => k))('mineru_testing_server')}
             </div>
         `;
 
@@ -5326,7 +5329,7 @@ async function testMineruAPI(event) {
             } else {
                 resultDiv.innerHTML = `
                     <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc2626; border-radius: 6px; color: #721c24;">
-                        <i class="fas fa-times-circle"></i> <strong>test failed</strong>
+                        <i class="fas fa-times-circle"></i> <strong>${(window.__t || (k => k))('llm_test_failed')}</strong>
                         <div style="margin-top: 8px; font-size: 13px;">${data.error || 'unknown error'}</div>
                     </div>
                 `;
@@ -5334,7 +5337,7 @@ async function testMineruAPI(event) {
         } catch (error) {
             resultDiv.innerHTML = `
                 <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc2626; border-radius: 6px; color: #721c24;">
-                    <i class="fas fa-times-circle"></i> <strong>test failed</strong>
+                    <i class="fas fa-times-circle"></i> <strong>${(window.__t || (k => k))('llm_test_failed')}</strong>
                     <div style="margin-top: 8px; font-size: 13px;">${error.message}</div>
                 </div>
             `;
@@ -5346,7 +5349,7 @@ async function testMineruAPI(event) {
         if (!mineruApiToken) {
             resultDiv.innerHTML = `
                 <div style="padding: 12px; background: #fff3cd; border: 1px solid #ca8a04; border-radius: 6px; color: #856404;">
-                    <i class="fas fa-exclamation-triangle"></i> Please enter API token
+                    <i class="fas fa-exclamation-triangle"></i> ${(window.__t || (k => k))('mineru_fill_token')}
                 </div>
             `;
             resultDiv.style.display = 'block';
@@ -5382,7 +5385,7 @@ async function testMineruAPI(event) {
             } else {
                 resultDiv.innerHTML = `
                     <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc2626; border-radius: 6px; color: #721c24;">
-                        <i class="fas fa-times-circle"></i> <strong>test failed</strong>
+                        <i class="fas fa-times-circle"></i> <strong>${(window.__t || (k => k))('llm_test_failed')}</strong>
                         <div style="margin-top: 8px; font-size: 13px;">${data.error || 'unknown error'}</div>
                     </div>
                 `;
@@ -5390,7 +5393,7 @@ async function testMineruAPI(event) {
         } catch (error) {
             resultDiv.innerHTML = `
                 <div style="padding: 12px; background: #f8d7da; border: 1px solid #dc2626; border-radius: 6px; color: #721c24;">
-                    <i class="fas fa-times-circle"></i> <strong>test failed</strong>
+                    <i class="fas fa-times-circle"></i> <strong>${(window.__t || (k => k))('llm_test_failed')}</strong>
                     <div style="margin-top: 8px; font-size: 13px;">${error.message}</div>
                 </div>
             `;
@@ -5462,7 +5465,7 @@ async function getTranslationSettings() {
 // ========== General set up（Deprecated）==========
 async function saveGeneralSettings() {
     console.warn('saveGeneralSettings is deprecated, General settings have been removed');
-    showMessage('General Setting is obsolete', 'warning');
+    showMessage(window.__t ? window.__t('msg_general_setting_obsolete') : 'General Setting is obsolete', 'warning');
 }
 
 async function loadGeneralSettings() {
@@ -6123,14 +6126,14 @@ async function addTestReadingData() {
         await getDailyReadingData();
 
         console.log('Test data has been added');
-        showMessage('Test data has been added and the heat map has been refreshed....', 'success');
+        showMessage(window.__t ? window.__t('msg_test_data_added') : 'Test data has been added and the heat map has been refreshed....', 'success');
 
         // Refresh heat map
         renderHeatmap();
         renderOverviewStats();
     } catch (e) {
         console.error('Failed to add test data:', e);
-        showMessage('Failed to add test data', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_add_test_data') : 'Failed to add test data', 'error');
     }
 }
 
@@ -6141,14 +6144,14 @@ async function clearReadingData() {
             await fetch('/api/settings/reading-history/clear', { method: 'POST' });
             readingHistoryCache = null;
             console.log('Reading data cleared');
-            showMessage('Reading data cleared', 'success');
+            showMessage(window.__t ? window.__t('msg_reading_data_cleared') : 'Reading data cleared', 'success');
 
             // Refresh heat map
             renderHeatmap();
             renderOverviewStats();
         } catch (e) {
             console.error('Clear data failed:', e);
-            showMessage('Clear data failed', 'error');
+            showMessage(window.__t ? window.__t('msg_clear_data_failed') : 'Clear data failed', 'error');
         }
     }
 }
@@ -6604,7 +6607,7 @@ function saveHabitSettings() {
         recentCount: (!isNaN(count) && count > 0) ? count : 10
     };
     localStorage.setItem('habitSettings', JSON.stringify(settings));
-    showMessage('Habit Settings saved', 'success');
+    showMessage(window.__t ? window.__t('msg_habit_settings_saved') : 'Habit Settings saved', 'success');
     // Apply now
     renderRecentIfNoCategory();
 }
@@ -6650,42 +6653,45 @@ function updateTaskIndicator() {
 }
 
 function renderTaskTooltip() {
+    const t = window.__t || (k => k);
     const tooltip = document.getElementById('task-tooltip');
     if (!tooltip) return;
     const parts = [];
+    const lblQueue = t('label_queue');
+    const lblImplement = t('label_implement');
     // translate
     const tBlock = [];
     translationQueue.forEach(pid => {
         const p = (papers || []).find(x => x.id === pid) || {};
-        tBlock.push(`<div class=\"tt-item\"><i class=\"fas fa-file-pdf\"></i><span>(queue)</span> ${escapeHtml(p.title || p.filename || pid)}</div>`);
+        tBlock.push(`<div class=\"tt-item\"><i class=\"fas fa-file-pdf\"></i><span>${lblQueue}</span> ${escapeHtml(p.title || p.filename || pid)}</div>`);
     });
     Object.entries(translationStatus).forEach(([pid, s]) => {
         if (s.status === 'translating') {
             const p = (papers || []).find(x => x.id === pid) || {};
-            tBlock.push(`<div class=\"tt-item\"><i class=\"fas fa-file-pdf\"></i><span>(implement)</span> ${escapeHtml(p.title || p.filename || pid)}</div>`);
+            tBlock.push(`<div class=\"tt-item\"><i class=\"fas fa-file-pdf\"></i><span>${lblImplement}</span> ${escapeHtml(p.title || p.filename || pid)}</div>`);
         }
     });
     if (tBlock.length) {
-        parts.push('<div class="tt-title">turn translate</div>');
+        parts.push('<div class="tt-title">' + t('batch_translate') + '</div>');
         parts.push(`<div class=\"tt-group\">${tBlock.join('')}</div>`);
     }
     // Interpretation
     const aBlock = [];
     analysisQueue.forEach(pid => {
         const p = (papers || []).find(x => x.id === pid) || {};
-        aBlock.push(`<div class=\"tt-item\"><i class=\"fas fa-file-pdf\"></i><span>(queue)</span> ${escapeHtml(p.title || p.filename || pid)}</div>`);
+        aBlock.push(`<div class=\"tt-item\"><i class=\"fas fa-file-pdf\"></i><span>${lblQueue}</span> ${escapeHtml(p.title || p.filename || pid)}</div>`);
     });
     Object.entries(analysisStatus).forEach(([pid, s]) => {
         if (s.status === 'analyzing') {
             const p = (papers || []).find(x => x.id === pid) || {};
-            aBlock.push(`<div class=\"tt-item\"><i class=\"fas fa-file-pdf\"></i><span>(implement)</span> ${escapeHtml(p.title || p.filename || pid)}</div>`);
+            aBlock.push(`<div class=\"tt-item\"><i class=\"fas fa-file-pdf\"></i><span>${lblImplement}</span> ${escapeHtml(p.title || p.filename || pid)}</div>`);
         }
     });
     if (aBlock.length) {
-        parts.push('<div class="tt-title">untie read</div>');
+        parts.push('<div class="tt-title">' + t('batch_analyze') + '</div>');
         parts.push(`<div class=\"tt-group\">${aBlock.join('')}</div>`);
     }
-    tooltip.innerHTML = parts.length ? parts.join('') : '<div class="tt-item" style="color:#888;">No tasks in progress</div>';
+    tooltip.innerHTML = parts.length ? parts.join('') : '<div class="tt-item" style="color:#888;">' + t('tt_no_tasks') + '</div>';
 }
 
 // Show empty status（When no directory is selected）
@@ -6729,7 +6735,7 @@ async function requestTranslation(paperId, event) {
     }
     const paper = papers.find(p => p.id === paperId);
     if (!paper) {
-        showMessage('Paper not found', 'error');
+        showMessage(window.__t ? window.__t('msg_paper_not_found') : 'Paper not found', 'error');
         return;
     }
 
@@ -6797,7 +6803,7 @@ async function processTranslationQueue() {
     try {
         updateTranslationStatus(paperId, 'translating', 0);
         renderPapersList(); // Update display
-        showMessage('Translation started', 'info', 2000);
+        showMessage(window.__t ? window.__t('msg_translation_started') : 'Translation started', 'info', 2000);
 
         const settings = await getTranslationSettings();
         const llmCfg = getAgenticLLMConfig(settings, 'translate');
@@ -6840,7 +6846,7 @@ async function processTranslationQueue() {
         console.error('Translation failed:', error);
         updateTranslationStatus(paperId, 'error', 0);
         saveQueuesToStorage();
-        showMessage('Translation failed, please try again later', 'error');
+        showMessage(window.__t ? window.__t('msg_translation_failed_try') : 'Translation failed, please try again later', 'error');
         isTranslating = false;
         renderPapersList(); // Update display
         processTranslationQueue(); // Continue processing the queue
@@ -6884,7 +6890,7 @@ function startLogPolling(taskId, paperId) {
                             paper.has_chinese_version = true;
                             paper.chinese_version_path = result.result.chinese_version_path;
                         }
-                        showMessage('Translation completed', 'success');
+                        showMessage(window.__t ? window.__t('msg_translation_completed') : 'Translation completed', 'success');
                         // When the translation is completed, the status column will be updated automatically.
                     } else {
                         updateTranslationStatus(paperId, 'error', 0, currentTaskId);
@@ -6945,7 +6951,7 @@ async function showTranslationLogs(paperId, event) {
     }
     const status = translationStatus[paperId];
     if (!status) {
-        showMessage('Translation task not found', 'warning');
+        showMessage(window.__t ? window.__t('msg_translation_task_not_found') : 'Translation task not found', 'warning');
         return;
     }
     if (!status.taskId) {
@@ -6964,11 +6970,11 @@ async function showTranslationLogs(paperId, event) {
             // Show log modal box
             showLogModal(taskId, result.logs, result.status, paperId);
         } else {
-            showMessage('Failed to get log', 'error');
+            showMessage(window.__t ? window.__t('msg_failed_get_log') : 'Failed to get log', 'error');
         }
     } catch (error) {
         console.error('Failed to get log:', error);
-        showMessage('Failed to get log', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_get_log') : 'Failed to get log', 'error');
     }
 }
 
@@ -6979,23 +6985,24 @@ function showLogModal(taskId, logs, status, paperId) {
     const confirmBtn = document.querySelector('#modal-confirm');
     const cancelBtn = document.querySelector('#modal-cancel');
 
-    modalTitle.textContent = 'Translation log';
+    const __t = window.__t || (k => k);
+    modalTitle.textContent = __t('log_title_translation');
 
-    const logContent = logs.length > 0 ? logs.join('\n') : 'No logs yet';
+    const logContent = logs.length > 0 ? logs.join('\n') : __t('log_no_logs');
     const canCancel = status === 'running' || status === 'queued';
 
     modalBody.innerHTML = `
         <div style="margin-bottom: 15px;">
-            <strong>state:</strong> 
+            <strong>${__t('log_state')}</strong>
             <span id="log-status">${getStatusText(status)}</span>
         </div>
         <div style="margin-bottom: 15px;">
             <button class="btn btn-secondary" onclick="refreshLogs('${taskId}', '${paperId}')" style="margin-right: 10px;">
-                <i class="fas fa-refresh"></i> Refresh log
+                <i class="fas fa-refresh"></i> ${__t('log_refresh')}
             </button>
             ${canCancel ? `
             <button class="btn btn-danger" onclick="cancelTranslation('${taskId}', '${paperId}')">
-                <i class="fas fa-stop"></i> Terminate translation
+                <i class="fas fa-stop"></i> ${__t('btn_terminate_translation')}
             </button>
             ` : ''}
         </div>
@@ -7005,7 +7012,7 @@ function showLogModal(taskId, logs, status, paperId) {
     `;
 
     confirmBtn.style.display = 'none';
-    cancelBtn.textContent = 'closure';
+    cancelBtn.textContent = __t('modal_closure');
     cancelBtn.onclick = () => hideModal();
 
     showModal();
@@ -7066,7 +7073,7 @@ async function refreshLogs(taskId, paperId) {
 
 // Cancel translation（Cancel from status, requiredtaskId）
 async function cancelTranslation(taskId, paperId) {
-    if (!confirm('Are you sure you want to terminate the translation?')) {
+    if (!confirm(window.__t ? window.__t('msg_confirm_terminate_translation') : 'Are you sure you want to terminate the translation?')) {
         return;
     }
 
@@ -7088,7 +7095,7 @@ async function cancelTranslation(taskId, paperId) {
         } else {
             // If the task does not exist（Server restart, etc.）, clean up the front-end status
             if (response.status === 404 || (result.error && result.error.includes('Task does not exist'))) {
-                showMessage('The task does not exist and has been cleared', 'warning');
+                showMessage(window.__t ? window.__t('msg_task_cleared') : 'The task does not exist and has been cleared', 'warning');
                 // Check if translation is happening（Check before deleting status）
                 const wasTranslating = isTranslating && translationStatus[paperId] && translationStatus[paperId].taskId === taskId;
                 // Clean up frontend state
@@ -7117,7 +7124,7 @@ async function cancelTranslation(taskId, paperId) {
         }
     } catch (error) {
         console.error('Cancel translation failed:', error);
-        showMessage('Cancel translation failed', 'error');
+        showMessage(window.__t ? window.__t('msg_cancel_translation_failed') : 'Cancel translation failed', 'error');
     }
 }
 
@@ -7126,7 +7133,7 @@ async function cancelTranslationFromStatus(paperId, event) {
     if (event) event.stopPropagation();
     const status = translationStatus[paperId];
     if (!status || !status.taskId) {
-        showMessage('Translation task not found', 'warning');
+        showMessage(window.__t ? window.__t('msg_translation_task_not_found') : 'Translation task not found', 'warning');
         return;
     }
     await cancelTranslation(status.taskId, paperId);
@@ -7137,7 +7144,7 @@ async function cancelTranslationFromQueue(paperId, event) {
     if (event) event.stopPropagation();
     const index = translationQueue.indexOf(paperId);
     if (index === -1) {
-        showMessage('The paper is not in the queue', 'warning');
+        showMessage(window.__t ? window.__t('msg_paper_not_in_queue') : 'The paper is not in the queue', 'warning');
         return;
     }
     translationQueue.splice(index, 1);
@@ -7147,14 +7154,15 @@ async function cancelTranslationFromQueue(paperId, event) {
     // Removed from queue, status column will update automatically
 }
 
-// Get status text
+// Get status text (i18n)
 function getStatusText(status) {
+    const t = window.__t || (k => k);
     const statusMap = {
-        'queued': 'in queue',
-        'running': 'Translating',
-        'completed': 'Completed',
-        'failed': 'fail',
-        'cancelled': 'Canceled'
+        'queued': t('status_queued'),
+        'running': t('status_translating'),
+        'completed': t('status_completed'),
+        'failed': t('status_failed'),
+        'cancelled': t('status_cancelled')
     };
     return statusMap[status] || status;
 }
@@ -7231,21 +7239,23 @@ function getTranslationStatusText(paperId) {
     const status = translationStatus[paperId];
     if (!status) return '';
 
+    const _t = window.__t || (k => k);
     if (status.status === 'translating') {
         const progress = clampProgress(status.progress ?? 0);
+        const pctText = _t('status_translating_pct').replace('{pct}', Math.round(progress));
         return `<span class="translation-status translating">
-            Translating ${Math.round(progress)}%
+            ${pctText}
             <span class="progress-bar-container translation-status-bar"><span class="progress-bar" style="width: ${progress}%;"></span></span>
-            <button class="status-cancel-btn" onclick="cancelTranslationFromStatus('${paperId}', event)" title="Cancel translation">
+            <button class="status-cancel-btn" onclick="cancelTranslationFromStatus('${paperId}', event)" title="${_t('status_cancel_translation')}">
                 <i class="fas fa-times"></i>
             </button>
         </span>`;
     } else if (status.status === 'queued') {
-        // Calculate the current position in the queue
         const currentIndex = translationQueue.indexOf(paperId) + 1;
+        const inQueueText = _t('status_in_queue_xy').replace('{current}', currentIndex).replace('{total}', translationQueue.length);
         return `<span class="translation-status queued">
-            <i class="fas fa-clock"></i> in queue (${currentIndex}/${translationQueue.length})
-            <button class="status-cancel-btn" onclick="cancelTranslationFromQueue('${paperId}', event)" title="Cancel queue">
+            <i class="fas fa-clock"></i> ${inQueueText}
+            <button class="status-cancel-btn" onclick="cancelTranslationFromQueue('${paperId}', event)" title="${_t('status_cancel_queue')}">
                 <i class="fas fa-times"></i>
             </button>
         </span>`;
@@ -7305,7 +7315,7 @@ function parseTranslationProgressFromLogs(logs) {
 function openChineseVersion(paperId) {
     const paper = papers.find(p => p.id === paperId);
     if (!paper || !paper.has_chinese_version) {
-        showMessage('Chinese version does not exist', 'error');
+        showMessage(window.__t ? window.__t('msg_chinese_version_not_exist') : 'Chinese version does not exist', 'error');
         return;
     }
     const viewerUrl = `/viewer/${paperId}?chinese=true`;
@@ -8262,14 +8272,14 @@ async function requestAnalysis(paperId, event) {
 
     const paper = papers.find(p => p.id === paperId);
     if (!paper) {
-        showMessage('Paper not found', 'error');
+        showMessage(window.__t ? window.__t('msg_paper_not_found') : 'Paper not found', 'error');
         return;
     }
 
     // Check if interpretation results already exist
     const hasResult = paper.has_analysis_result;
     if (hasResult) {
-        if (!confirm('This paper already has an AI Interpretation, reinterpret?')) {
+        if (!confirm(window.__t ? window.__t('msg_confirm_reinterpret') : 'This paper already has an AI Interpretation, reinterpret?')) {
             return;
         }
     }
@@ -8349,7 +8359,7 @@ async function processAnalysisQueue() {
     try {
         // The update status is in interpretation
         updateAnalysisStatus(paperId, 'analyzing');
-        showMessage('AI interpretation started', 'info', 2000);
+        showMessage(window.__t ? window.__t('msg_interpretation_started') : 'AI interpretation started', 'info', 2000);
 
         // Get settings
         const settings = await getAnalysisSettings();
@@ -8432,7 +8442,7 @@ async function pollAnalysisStatus(taskId, paperId) {
                     }
                     isAnalyzing = false;
                     stopAnalysisLogPolling(taskId);
-                    showMessage('AI interpretation completed', 'success');
+                    showMessage(window.__t ? window.__t('msg_interpretation_completed') : 'AI interpretation completed', 'success');
                     // When the interpretation is completed, the status column will be automatically updated.
                     // Refresh the list based on the current view mode
                     await refreshCurrentViewList();
@@ -8542,7 +8552,7 @@ function updatePaperStatusDisplay(paperId) {
             </div>`;
         } else if (tStatus && tStatus.status === 'queued') {
             const currentIndex = translationQueue.indexOf(paperId) + 1;
-            const queueText = currentIndex > 0 ? `Queue ${currentIndex}` : 'Queueing';
+            const _t = window.__t || (k => k); const queueText = currentIndex > 0 ? _t('status_queue_n').replace('{n}', currentIndex) : _t('status_queueing');
             translateColHtml = `
             <div style="display: flex; flex-direction: column; width: 100%; gap: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
@@ -8588,7 +8598,7 @@ function updatePaperStatusDisplay(paperId) {
             </div>`;
         } else if (aStatus && aStatus.status === 'queued') {
             const currentIndex = analysisQueue.indexOf(paperId) + 1;
-            const queueText = currentIndex > 0 ? `Queue ${currentIndex}` : 'Queueing';
+            const _t = window.__t || (k => k); const queueText = currentIndex > 0 ? _t('status_queue_n').replace('{n}', currentIndex) : _t('status_queueing');
             analyzeColHtml = `
             <div style="display: flex; flex-direction: column; width: 100%; gap: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1;">
@@ -8601,9 +8611,11 @@ function updatePaperStatusDisplay(paperId) {
                 </div>
             </div>`;
         } else if (paper.has_analysis_result) {
-            analyzeColHtml = `<button class="paper-col-btn view analysis" onclick="viewAnalysisResult('${paperId}', event)"><i class="fas fa-brain"></i> AI Interpretation</button>`;
+            const _colInterpret = (window.__t || (k => k))('col_ai_interpretation');
+            analyzeColHtml = `<button class="paper-col-btn view analysis" onclick="viewAnalysisResult('${paperId}', event)"><i class="fas fa-brain"></i> ${_colInterpret}</button>`;
         } else {
-            analyzeColHtml = `<button class="paper-col-btn analyze icon-only" onclick="requestAnalysis('${paperId}', event)" title="AI Interpretation"><i class="fas fa-brain"></i></button>`;
+            const _colInterpret = (window.__t || (k => k))('col_ai_interpretation');
+            analyzeColHtml = `<button class="paper-col-btn analyze icon-only" onclick="requestAnalysis('${paperId}', event)" title="${_colInterpret}"><i class="fas fa-brain"></i></button>`;
         }
         analyzeActionCol.innerHTML = analyzeColHtml;
     }
@@ -8663,8 +8675,8 @@ function updatePaperStatusDisplay(paperId) {
                 if (btnContainer) {
                     const btnHtml = `
                         <div class="chinese-version-btn-container" style="margin-top: 5px;">
-                            <button class="chinese-version-btn" onclick="viewAnalysisResult('${paperId}', event)" title="Check AI Interpretation" style="background: #171717; color: white; border-color: #171717;">
-                                <i class="fas fa-brain"></i> Check AI Interpretation
+                            <button class="chinese-version-btn" onclick="viewAnalysisResult('${paperId}', event)" title="${(window.__t || (k => k))('btn_check_ai_interpretation')}" style="background: #171717; color: white; border-color: #171717;">
+                                <i class="fas fa-brain"></i> ${(window.__t || (k => k))('btn_check_ai_interpretation')}
                             </button>
                         </div>
                     `;
@@ -8677,27 +8689,29 @@ function updatePaperStatusDisplay(paperId) {
 
 // Get interpretation status display text
 function getAnalysisStatusText(paperId) {
+    const _t = window.__t || (k => k);
     const status = analysisStatus[paperId];
     if (!status) return '';
 
     if (status.status === 'analyzing') {
-        const step = status.step === 'pdf2md' ? 'PDFchangeMarkdown' : status.step === 'llm_analysis' ? 'LLMInterpretation' : 'Interpreting';
+        const step = status.step === 'pdf2md' ? _t('step_pdf2md') : status.step === 'llm_analysis' ? _t('step_llm_analysis') : _t('step_default');
+        const stepText = _t('status_interpreting_step').replace('{step}', step);
         return `<span class="translation-status translating">
-            <i class="fas fa-spinner fa-spin"></i> Interpreting (${step})...
-            <button class="status-cancel-btn" onclick="cancelAnalysisFromStatus('${paperId}', event)" title="Cancel interpretation">
+            <i class="fas fa-spinner fa-spin"></i> ${stepText}
+            <button class="status-cancel-btn" onclick="cancelAnalysisFromStatus('${paperId}', event)" title="${_t('status_cancel_interpretation')}">
                 <i class="fas fa-times"></i>
             </button>
         </span>`;
     } else if (status.status === 'queued') {
         const currentIndex = analysisQueue.indexOf(paperId) + 1;
+        const queueText = _t('status_interpretation_queue_xy').replace('{current}', currentIndex).replace('{total}', analysisQueue.length);
         return `<span class="translation-status queued">
-            <i class="fas fa-clock"></i> Interpretation queue (${currentIndex}/${analysisQueue.length})
-            <button class="status-cancel-btn" onclick="cancelAnalysisFromQueue('${paperId}', event)" title="Cancel queue">
+            <i class="fas fa-clock"></i> ${queueText}
+            <button class="status-cancel-btn" onclick="cancelAnalysisFromQueue('${paperId}', event)" title="${_t('status_cancel_queue')}">
                 <i class="fas fa-times"></i>
             </button>
         </span>`;
     } else if (status.status === 'completed') {
-        // Don't show status text on completion because there is already"Check AI Interpretation"button
         return '';
     }
     return '';
@@ -8798,7 +8812,7 @@ async function showAnalysisLogs(paperId, event) {
 
     const status = analysisStatus[paperId];
     if (!status || !status.taskId) {
-        showMessage('Interpretation task not found', 'error');
+        showMessage(window.__t ? window.__t('msg_interpretation_task_not_found') : 'Interpretation task not found', 'error');
         return;
     }
 
@@ -8811,26 +8825,28 @@ async function showAnalysisLogs(paperId, event) {
         if (response.ok && result.success) {
             showAnalysisLogModal(taskId, result.logs, result.status, result.step, paperId);
         } else {
-            showMessage(result.error || 'Failed to get log', 'error');
+            showMessage(result.error || (window.__t ? window.__t('msg_failed_get_log') : 'Failed to get log'), 'error');
         }
     } catch (error) {
         console.error('Failed to get log:', error);
-        showMessage('Failed to get log', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_get_log') : 'Failed to get log', 'error');
     }
 }
 
 // Show interpretation log modal box
 function showAnalysisLogModal(taskId, logs, status, step, paperId) {
+    const _t = window.__t || (k => k);
     const modalTitle = document.querySelector('#modal-title');
     const modalBody = document.querySelector('#modal-body');
     const confirmBtn = document.querySelector('#modal-confirm');
     const cancelBtn = document.querySelector('#modal-cancel');
 
-    modalTitle.textContent = 'Interpret logs';
+    modalTitle.textContent = _t('log_interpret_logs');
+    const stepLabel = step === 'pdf2md' ? _t('step_pdf2md') : step === 'llm_analysis' ? _t('step_llm_analysis') : step;
     modalBody.innerHTML = `
         <div style="margin-bottom: 10px;">
-            <strong>state:</strong> <span id="log-status">${getStatusText(status)}</span>
-            ${step ? `<br><strong>current step:</strong> ${step === 'pdf2md' ? 'PDFchangeMarkdown' : step === 'llm_analysis' ? 'LLMInterpretation' : step}` : ''}
+            <strong>${_t('log_state')}</strong> <span id="log-status">${getStatusText(status)}</span>
+            ${step ? `<br><strong>${_t('log_current_step')}</strong> ${stepLabel}` : ''}
         </div>
         <div style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 4px; max-height: 400px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;" id="log-content">
             ${logs.map(log => escapeHtml(log)).join('\n')}
@@ -8838,8 +8854,8 @@ function showAnalysisLogModal(taskId, logs, status, step, paperId) {
     `;
 
     confirmBtn.style.display = status === 'running' ? 'inline-block' : 'none';
-    confirmBtn.textContent = 'Cancel interpretation';
-    cancelBtn.textContent = 'closure';
+    confirmBtn.textContent = _t('status_cancel_interpretation');
+    cancelBtn.textContent = _t('modal_closure');
 
     // Clear previous event listeners
     const confirmBtnClone = confirmBtn.cloneNode(true);
@@ -8929,7 +8945,7 @@ async function cancelAnalysisTask(taskId, paperId) {
         } else {
             // If the task does not exist（Server restart, etc.）, clean up the front-end status
             if (response.status === 404 || (result.error && result.error.includes('Task does not exist'))) {
-                showMessage('The task does not exist and has been cleared', 'warning');
+                showMessage(window.__t ? window.__t('msg_task_cleared') : 'The task does not exist and has been cleared', 'warning');
                 // Check if interpreting（Check before deleting status）
                 const wasAnalyzing = isAnalyzing && analysisStatus[paperId] && analysisStatus[paperId].taskId === taskId;
                 // Clean up frontend state
@@ -8964,7 +8980,7 @@ async function cancelAnalysisTask(taskId, paperId) {
         }
     } catch (error) {
         console.error('Failed to cancel interpretation:', error);
-        showMessage('Cancellation failed', 'error');
+        showMessage(window.__t ? window.__t('msg_cancel_interpretation_failed') : 'Cancellation failed', 'error');
     }
 }
 
@@ -8973,10 +8989,10 @@ async function cancelAnalysisFromStatus(paperId, event) {
     if (event) event.stopPropagation();
     const status = analysisStatus[paperId];
     if (!status || !status.taskId) {
-        showMessage('Interpretation task not found', 'warning');
+        showMessage(window.__t ? window.__t('msg_interpretation_task_not_found') : 'Interpretation task not found', 'warning');
         return;
     }
-    if (!confirm('Are you sure you want to terminate the interpretation?')) {
+    if (!confirm(window.__t ? window.__t('msg_confirm_terminate_interpretation') : 'Are you sure you want to terminate the interpretation?')) {
         return;
     }
     await cancelAnalysisTask(status.taskId, paperId);
@@ -8987,7 +9003,7 @@ async function cancelAnalysisFromQueue(paperId, event) {
     if (event) event.stopPropagation();
     const index = analysisQueue.indexOf(paperId);
     if (index === -1) {
-        showMessage('The paper is not in the queue', 'warning');
+        showMessage(window.__t ? window.__t('msg_paper_not_in_queue') : 'The paper is not in the queue', 'warning');
         return;
     }
     analysisQueue.splice(index, 1);
@@ -9124,7 +9140,7 @@ async function viewAnalysisResult(paperId, event) {
         }
     } catch (e) {
         console.error('Failed to get results:', e);
-        showMessage('Failed to get results', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_get_results') : 'Failed to get results', 'error');
     }
 }
 
@@ -9410,7 +9426,7 @@ function cancelTranslation(paperId, event) {
             })
             .catch(err => {
                 console.error('Cancel translation failed:', err);
-                showMessage('Cancel translation failed', 'error');
+                showMessage(window.__t ? window.__t('msg_cancel_translation_failed') : 'Cancel translation failed', 'error');
             });
     }
 
@@ -10623,15 +10639,15 @@ async function saveDailyArxivSettings(silent = false) {
 
         if (res.ok) {
             if (!silent) {
-                showMessage('Daily arXiv Settings saved', 'success');
+                showMessage(window.__t ? window.__t('msg_daily_settings_saved') : 'Daily arXiv Settings saved', 'success');
             }
             renderDailyArxivCategoryTags();
         } else {
-            showMessage('Failed to save settings', 'error');
+            showMessage(window.__t ? window.__t('msg_failed_save_settings') : 'Failed to save settings', 'error');
         }
     } catch (err) {
         console.error('keep Daily arXiv Setup failed:', err);
-        showMessage('Failed to save settings', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_save_settings') : 'Failed to save settings', 'error');
     }
 }
 
@@ -10642,12 +10658,12 @@ function addDailyArxivCategory() {
 
     const category = input.value.trim().toLowerCase();
     if (!category) {
-        showMessage('Please enter a partition name', 'warning');
+        showMessage(window.__t ? window.__t('msg_please_enter_partition_name') : 'Please enter a partition name', 'warning');
         return;
     }
 
     if (dailyArxivCategories.includes(category)) {
-        showMessage('The partition already exists', 'warning');
+        showMessage(window.__t ? window.__t('msg_partition_already_exists') : 'The partition already exists', 'warning');
         return;
     }
 
@@ -10662,7 +10678,7 @@ function addDailyArxivCategory() {
 // Quickly add partitions
 function addDailyArxivCategoryQuick(category) {
     if (dailyArxivCategories.includes(category)) {
-        showMessage('The partition already exists', 'warning');
+        showMessage(window.__t ? window.__t('msg_partition_already_exists') : 'The partition already exists', 'warning');
         return;
     }
 
@@ -10739,7 +10755,7 @@ function addDailyArxivKeyword() {
 
     const keyword = input.value.trim();
     if (!keyword) {
-        showMessage('Please enter keywords', 'warning');
+        showMessage(window.__t ? window.__t('msg_please_enter_keywords') : 'Please enter keywords', 'warning');
         return;
     }
 
@@ -10749,7 +10765,7 @@ function addDailyArxivKeyword() {
     }
 
     if (dailyArxivSettings.keywordList.includes(keyword)) {
-        showMessage('This keyword already exists', 'warning');
+        showMessage(window.__t ? window.__t('msg_keyword_already_exists') : 'This keyword already exists', 'warning');
         input.value = '';
         return;
     }
@@ -10985,7 +11001,7 @@ function showRoundedNotification(message, type = 'error', persistent = true, not
 // Trigger crawling of papers（current partition）
 async function triggerFetchPapers(force = false) {
     if (!isDailyArxivEnabled()) {
-        showMessage('Daily arXiv is disabled in settings', 'warning');
+        showMessage(window.__t ? window.__t('msg_daily_disabled_in_settings') : 'Daily arXiv is disabled in settings', 'warning');
         setDailyArxivEmptyState('disabled');
         return;
     }
@@ -11003,7 +11019,7 @@ async function triggerFetchPapers(force = false) {
     }
 
     if (dailyArxivCategories.length === 0) {
-        showMessage('Please configure first arXiv Partition', 'warning');
+        showMessage(window.__t ? window.__t('msg_please_configure_arxiv_first') : 'Please configure first arXiv Partition', 'warning');
         return;
     }
 
@@ -11057,14 +11073,14 @@ async function triggerFetchPapers(force = false) {
         }
     } catch (err) {
         console.error('Failed to trigger crawl:', err);
-        showMessage('Failed to trigger crawl', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_trigger_crawl') : 'Failed to trigger crawl', 'error');
     }
 }
 
 // Triggers crawling of papers in all partitions
 async function triggerFetchAllCategories(force = false, dateStr = null) {
     if (!isDailyArxivEnabled()) {
-        showMessage('Daily arXiv is disabled in settings', 'warning');
+        showMessage(window.__t ? window.__t('msg_daily_disabled_in_settings') : 'Daily arXiv is disabled in settings', 'warning');
         setDailyArxivEmptyState('disabled');
         return;
     }
@@ -11082,7 +11098,7 @@ async function triggerFetchAllCategories(force = false, dateStr = null) {
     }
 
     if (dailyArxivCategories.length === 0) {
-        showMessage('Please configure first arXiv Partition', 'warning');
+        showMessage(window.__t ? window.__t('msg_please_configure_arxiv_first') : 'Please configure first arXiv Partition', 'warning');
         return;
     }
 
@@ -11133,7 +11149,7 @@ async function triggerFetchAllCategories(force = false, dateStr = null) {
         }
     } catch (err) {
         console.error('Failed to trigger crawl:', err);
-        showMessage('Failed to trigger crawl', 'error');
+        showMessage(window.__t ? window.__t('msg_failed_trigger_crawl') : 'Failed to trigger crawl', 'error');
     }
 }
 
@@ -11764,6 +11780,7 @@ function getDailyArxivPapersForKeywordFilter() {
 
 // Rendering thesis grid
 function renderDailyArxivGrid() {
+    const _t = (typeof window.__t === 'function') ? window.__t : function (k) { return k; };
     const gridEl = document.getElementById('daily-arxiv-grid');
     const emptyEl = document.getElementById('daily-arxiv-empty');
 
@@ -11794,8 +11811,8 @@ function renderDailyArxivGrid() {
             gridEl.innerHTML = `
                 <div class="daily-arxiv-no-results">
                     <i class="fas fa-filter fa-3x" style="margin-bottom: 20px; color: #bbb;"></i>
-                    <h3 style="margin-bottom: 10px; font-size: 1.5em; color: #555;">No matching search results</h3>
-                    <p style="font-size: 1em; color: #888;">Please try adjusting your search terms or filters</p>
+                    <h3 style="margin-bottom: 10px; font-size: 1.5em; color: #555;">${_t('daily_arxiv_no_search_results')}</h3>
+                    <p style="font-size: 1em; color: #888;">${_t('daily_arxiv_no_search_results_hint')}</p>
                 </div>
             `;
             if (emptyEl) emptyEl.style.display = 'none';
@@ -11824,7 +11841,7 @@ function renderDailyArxivGrid() {
 
                 let hint = '';
                 if (isToday && hasOtherDates) {
-                    hint = '<p style="margin-top: 15px; font-size: 0.9em; color: #2196F3;"><i class="fas fa-info-circle"></i> Tip: Click on the date navigation above to view historical papers</p>';
+                    hint = '<p style="margin-top: 15px; font-size: 0.9em; color: #2196F3;"><i class="fas fa-info-circle"></i> ' + _t('daily_arxiv_date_nav_hint') + '</p>';
                 }
 
                 // show"Waiting"hint
@@ -11832,7 +11849,6 @@ function renderDailyArxivGrid() {
                 gridEl.classList.add('daily-arxiv-grid-no-results');
 
                 // examine LLM Configuration
-                const _t = (typeof window.__t === 'function') ? window.__t : function (k) { return k; };
                 if (!dailyArxivLLMConfigured) {
                     gridEl.innerHTML = `
                         <div class="daily-arxiv-waiting" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: #666; width: 100%;">
@@ -12687,7 +12703,7 @@ async function extractAffiliationsForPaper(paperIndex) {
     const llmApiKey = agenticSettings.llmApiKey;
 
     if (!llmBaseUrl || !llmApiKey) {
-        showMessage('Please configure it in settings first Agentic Settings of LLM API', 'warning');
+        showMessage(window.__t ? window.__t('msg_please_configure_agentic_first') : 'Please configure it in settings first Agentic Settings of LLM API', 'warning');
         return;
     }
 
