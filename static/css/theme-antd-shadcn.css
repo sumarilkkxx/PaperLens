@@ -649,18 +649,12 @@ select.setting-input {
     color: var(--ant-color-text-secondary);
 }
 
-.heatmap-day {
+/* 仅无活动（level 0）使用主题灰，有活动格子由 style.css 的 data-scheme 色阶显示 */
+.heatmap-day[data-level="0"] {
     background: var(--ant-color-border-secondary) !important;
-    border-radius: 2px;
 }
-
-/* 热力图色阶：默认中性灰与类 shadcn 风格一致 */
-.heatmap-container {
-    --heatmap-l1: rgba(0, 0, 0, 0.12);
-    --heatmap-l2: rgba(0, 0, 0, 0.35);
-    --heatmap-l3: rgba(0, 0, 0, 0.55);
-    --heatmap-l4: rgba(0, 0, 0, 0.85);
-    --heatmap-glow: rgba(0, 0, 0, 0.2);
+.heatmap-day {
+    border-radius: 2px;
 }
 
 .heatmap-legend-label {
