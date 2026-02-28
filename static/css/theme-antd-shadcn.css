@@ -235,6 +235,19 @@ body {
     font-weight: 500;
 }
 
+.btn i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    vertical-align: middle;
+}
+.btn i.fas,
+.btn i.far,
+.btn i.fab {
+    font-size: 1em;
+}
+
 .btn-primary {
     background: var(--ant-primary) !important;
     color: #fff !important;

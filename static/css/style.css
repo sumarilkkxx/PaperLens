@@ -4531,6 +4531,18 @@ mark {
     color: #cbd5e1;
 }
 
+/* 按钮内的图标不继承上方 margin，并与文字垂直居中 */
+.daily-arxiv-empty .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.daily-arxiv-empty .btn i {
+    margin-bottom: 0 !important;
+    flex-shrink: 0;
+}
+
 .daily-arxiv-empty h3 {
     margin-bottom: 12px;
     color: #475569;
